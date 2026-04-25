@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minds Across Borders</title>
+
+  <!-- Google Fonts: editorial display + refined body (matching mockup serif title) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- D3 v7 — must load before all js/ modules -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ─── Header ──────────────────────────────────────────────────────────── -->
+  <header id="app-header">
+    <h1 class="site-title">Minds Across Borders</h1>
+
+    <nav class="metric-controls" aria-label="Metric selectors">
+      <!--
+        Dropdown for choropleth metric (map.js reads mapMetric from state).
+        Wire the change event to setState({ mapMetric: e.target.value }) in ui.js.
+      -->
+      <div class="metric-dropdown" id="ctrl-map-metric">
+        <label class="dropdown-label" for="select-map-metric">MAP:</label>
+        <select id="select-map-metric" class="pill-select" aria-label="Map metric">
+          <option value="mh_crisis_index">mh_crisis_index</option>
+          <option value="treatment_gap_pct">treatment_gap_pct</option>
+          <option value="psychiatrists_per100k">psychiatrists_per100k</option>
+          <option value="depression_pct">depression_pct</option>
+          <option value="anxiety_pct">anxiety_pct</option>
+          <option value="suicide_rate_per100k">suicide_rate_per100k</option>
+          <option value="mh_budget_pct_health">mh_budget_pct_health</option>
+          <option value="youth_mh_crisis_score">youth_mh_crisis_score</option>
+          <option value="mh_system_score">mh_system_score</option>
+        </select>
+      </div>
+
+      <div class="metric-dropdown" id="ctrl-bar-left">
+        <label class="dropdown-label" for="select-bar-left">RANK1:</label>
+        <select id="select-bar-left" class="pill-select" aria-label="Left bar metric">
+          <option value="treatment_gap_pct">treatment_gap_pct</option>
+          <option value="mh_crisis_index">mh_crisis_index</option>
+          <option value="depression_pct">depression_pct</option>
+          <option value="anxiety_pct">anxiety_pct</option>
+          <option value="suicide_rate_per100k">suicide_rate_per100k</option>
+          <option value="youth_mh_crisis_score">youth_mh_crisis_score</option>
+        </select>
+      </div>
+
+      <div class="metric-dropdown" id="ctrl-bar-right">
+        <label class="dropdown-label" for="select-bar-right">RANK2:</label>
+        <select id="select-bar-right" class="pill-select" aria-label="Right bar metric">
+          <option value="psychiatrists_per100k">psychiatrists_per100k</option>
+          <option value="mh_budget_pct_health">mh_budget_pct_health</option>
+          <option value="mh_spend_usd_per_capita">mh_spend_usd_per_capita</option>
+          <option value="mh_system_score">mh_system_score</option>
+          <option value="mh_investment_gap">mh_investment_gap</option>
+          <option value="gdp_per_capita_usd">gdp_per_capita_usd</option>
+        </select>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ─── Main layout ─────────────────────────────────────────────────────── -->
+  <main id="app-main">
+
+    <!-- Left column: map + region filter buttons -->
+    <section id="map-section" aria-label="World choropleth map">
+      <h2 class="map-title">Mental Health Crisis Index by Country</h2>
+
+      <!-- Rizvan mounts the D3 choropleth SVG here -->
+      <div id="map"></div>
+
+      <!-- Legend is rendered inside #map by map.js -->
+
+      <!-- Region focus buttons — Rizvan wires click → setState({ focusedRegion }) -->
+      <div id="region-buttons" role="group" aria-label="Filter by region">
+        <span class="region-label">Region</span>
+        <button class="region-btn" data-region="Africa">Africa</button>
+        <button class="region-btn" data-region="Americas">Americas</button>
+        <button class="region-btn" data-region="Europe">Europe</button>
+        <button class="region-btn" data-region="S-E Asia">S-E Asia</button>
+        <button class="region-btn" data-region="E. Med">E. Med</button>
+        <button class="region-btn" data-region="W. Pacific">W. Pacific</button>
+      </div>
+    </section>
+
+    <!-- Right column: bar charts -->
+    <section id="charts-section" aria-label="Country ranking charts">
+
+      <!-- Left bar chart: Illness ranking (treatment_gap_pct by default) -->
+      <div id="bar-left-container" class="bar-container">
+        <h2 class="chart-title" id="bar-left-title">
+          Illness Ranking (<span class="metric-name">treatment_gap_pct</span>)
+        </h2>
+        <!-- Andrew mounts D3 bar chart here -->
+        <div id="bar-left"></div>
+        <!-- Region color legend — Andrew renders in bar.js -->
+        <div id="bar-legend" class="bar-legend" aria-label="Region color legend"></div>
+      </div>
+
+      <!-- Right bar chart: Preparedness ranking (psychiatrists_per100k by default) -->
+      <div id="bar-right-container" class="bar-container">
+        <h2 class="chart-title" id="bar-right-title">
+          Preparedness Ranking (<span class="metric-name">psychiatrists_per100k</span>)
+        </h2>
+        <!-- Andrew mounts D3 bar chart here -->
+        <div id="bar-right"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!--
+    Tooltip — Andrew positions and populates this in ui.js on hoveredId change.
+    Hidden by default via CSS; shown with class "visible".
+  -->
+  <div id="tooltip" class="tooltip" role="tooltip" aria-live="polite" aria-hidden="true">
+    <p class="tooltip-hint">(Hover over tooltip)</p>
+    <h3 class="tooltip-country"></h3>
+    <p class="tooltip-region"></p>
+    <ul class="tooltip-stats">
+      <li>Crisis Index: <span class="tt-crisis"></span></li>
+      <li>Treatment Gap: <span class="tt-gap"></span></li>
+      <li>Psychiatrists/100k: <span class="tt-psych"></span></li>
+      <li>Budget: <span class="tt-budget"></span></li>
+    </ul>
+  </div>
+
+  <!--
+    Detail panel — Andrew shows/hides on selectedId change in ui.js.
+    Hidden by default; shown with class "visible".
+  -->
+  <div id="detail-panel" class="detail-panel" aria-label="Country detail" aria-hidden="true">
+    <h3 class="detail-country"></h3>
+    <p class="detail-meta">
+      Region: <span class="detail-region"></span>
+      &nbsp;|&nbsp;
+      Income Group: <span class="detail-income"></span>
+    </p>
+
+    <div class="detail-crisis">
+      <p>Crisis Index: <strong class="detail-crisis-val"></strong></p>
+      <ul class="detail-comparisons">
+        <li>vs Global Avg: <span class="dc-global"></span></li>
+        <li>vs Region Avg: <span class="dc-region"></span></li>
+        <li>vs Income-Group Avg: <span class="dc-income"></span></li>
+      </ul>
+    </div>
+
+    <hr class="detail-divider" />
+
+    <div class="detail-indicators">
+      <h4>Key Indicators</h4>
+      <ul>
+        <li>Treatment Gap: <span class="di-gap"></span></li>
+        <li>Psychiatrists/100k: <span class="di-psych"></span></li>
+        <li>Budget % Health: <span class="di-budget"></span></li>
+        <li>MH System Score: <span class="di-mhsys"></span></li>
+        <li>GDP per Capita: <span class="di-gdp"></span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!--
+    Scatter plot section (below map, per plan).
+    Rizvan mounts initScatter here. Placed after main layout so it can be
+    added to the DOM without breaking the two-column grid above.
+  -->
+  <section id="scatter-section" aria-label="Scatter plot">
+    <div id="scatter"></div>
+  </section>
+
+  <!-- ─── Script load order ────────────────────────────────────────────────
+    CRITICAL: state.js must load FIRST so getState / setState / subscribe
+    are available as globals before any feature module runs.
+    main.js loads LAST — it calls the four init* functions after all modules
+    have registered those functions on window.
+  ──────────────────────────────────────────────────────────────────────── -->
+  <script src="js/state.js"></script>    <!-- Sasi: getState / setState / subscribe -->
+  <script src="js/map.js"></script>      <!-- Rizvan: window.initMap -->
+  <script src="js/scatter.js"></script>  <!-- Rizvan: window.initScatter -->
+  <script src="js/bar.js"></script>      <!-- Andrew: window.initBar -->
+  <script src="js/ui.js"></script>       <!-- Andrew: window.initUI -->
+  <script src="js/main.js"></script>     <!-- Sasi/Rizvan/Andrew: boot() -->
+
+</body>
+</html>
