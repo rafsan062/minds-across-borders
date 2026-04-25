@@ -1,0 +1,586 @@
+/* ============================================================
+   styles.css — Minds Across Borders
+   Owner: Sasi
+   Teammates: do not add layout rules that conflict with the
+   two-column grid (#map-section / #charts-section).
+   Use the CSS custom properties below for colors so region
+   palettes stay consistent across map.js / bar.js / scatter.js.
+   ============================================================ */
+
+/* ─── Design tokens ────────────────────────────────────────── */
+:root {
+    /* Background */
+    --bg-page:         #fdf6ec;   /* warm cream from mockup */
+    --bg-map:          #fdf0e0;   /* slightly warmer inside map frame */
+    --bg-card:         #ffffff;
+    --bg-card-shadow:  rgba(0, 0, 0, 0.10);
+  
+    /* Primary text */
+    --text-primary:    #1a1a1a;
+    --text-secondary:  #5a5a5a;
+    --text-muted:      #8a8a8a;
+  
+    /* Header / controls */
+    --ctrl-bg:         #2cc0a8;   /* teal pill from mockup */
+    --ctrl-bg-hover:   #28ad97;
+    --ctrl-text:       #ffffff;
+    --ctrl-arrow:      #ffffff;
+  
+    /* Region palette (stable across all views — bar, scatter, map legend) */
+    --color-africa:    #e07b39;   /* orange */
+    --color-americas:  #3aafa9;   /* teal-green */
+    --color-europe:    #5b7ec5;   /* blue */
+    --color-se-asia:   #d9534f;   /* red */
+    --color-e-med:     #7b5ea7;   /* purple */
+    --color-w-pacific: #5aab55;   /* green */
+  
+    /* Map choropleth ramp (sequential pink→purple matching mockup) */
+    --map-ramp-low:    #f9e0ef;
+    --map-ramp-high:   #4a0066;
+  
+    /* Selection / hover */
+    --highlight-hover: rgba(0, 0, 0, 0.20);
+    --highlight-selected: #00e676;  /* bright green outline from mockup */
+  
+    /* Tooltip */
+    --tooltip-bg:      rgba(255, 255, 255, 0.95);
+    --tooltip-shadow:  rgba(0, 0, 0, 0.15);
+    --tooltip-border:  #e8e0d8;
+  
+    /* Typography */
+    --font-display:    "Playfair Display", Georgia, serif;
+    --font-body:       "DM Sans", system-ui, sans-serif;
+  
+    /* Spacing */
+    --gap-sm:  0.5rem;
+    --gap-md:  1rem;
+    --gap-lg:  1.75rem;
+  
+    /* Layout */
+    --header-h:        3.5rem;
+    --map-col-w:       58%;
+    --chart-col-w:     42%;
+    --border-radius:   0.5rem;
+  }
+  
+  /* ─── Reset & base ─────────────────────────────────────────── */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  html, body {
+    height: 100%;
+    font-family: var(--font-body);
+    font-size: 14px;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+  
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+  
+  ul { list-style: none; }
+  
+  /* ─── Header ───────────────────────────────────────────────── */
+  #app-header {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-lg);
+    padding: 0 var(--gap-lg);
+    height: var(--header-h);
+    background: var(--bg-page);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .site-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+  
+  /* ─── Metric dropdowns (pill selects) ──────────────────────── */
+  .metric-controls {
+    display: flex;
+    gap: var(--gap-sm);
+    flex-wrap: wrap;
+    margin-left: auto;   /* push to the right of title */
+  }
+  
+  .metric-dropdown {
+    display: flex;
+    align-items: center;
+  }
+  
+  .dropdown-label {
+    /* The label text is baked into the <select> option instead,
+       but kept as a visually hidden element for screen readers */
+    display: none;
+  }
+  
+  .pill-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--ctrl-bg);
+    color: var(--ctrl-text);
+    border: none;
+    border-radius: 2rem;
+    padding: 0.3rem 2rem 0.3rem 0.85rem;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    /* Custom chevron arrow using inline SVG data-uri */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    transition: background-color 0.15s;
+  }
+  
+  /* Prepend metric role label (MAP:, RANK1:, RANK2:) using CSS.
+     Kept in CSS so teammates don't need to duplicate text in HTML. */
+  #ctrl-map-metric .pill-select::before  { content: "MAP: ";   }
+  #ctrl-bar-left   .pill-select::before  { content: "RANK1: "; }
+  #ctrl-bar-right  .pill-select::before  { content: "RANK2: "; }
+  
+  /* Fallback: use data attributes on the wrapper for labelling */
+  #ctrl-map-metric { --prefix: "MAP: "; }
+  #ctrl-bar-left   { --prefix: "RANK1: "; }
+  #ctrl-bar-right  { --prefix: "RANK2: "; }
+  
+  .pill-select:hover,
+  .pill-select:focus {
+    background-color: var(--ctrl-bg-hover);
+    outline: 2px solid rgba(255,255,255,0.4);
+    outline-offset: 1px;
+  }
+  
+  /* Dropdown option list inherits body font */
+  .pill-select option {
+    font-family: var(--font-body);
+    background: #222;
+    color: #fff;
+  }
+  
+  /* ─── Main two-column layout ───────────────────────────────── */
+  #app-main {
+    display: grid;
+    grid-template-columns: var(--map-col-w) var(--chart-col-w);
+    gap: 0;
+    min-height: calc(100vh - var(--header-h));
+  }
+  
+  /* ─── Map section (left column) ────────────────────────────── */
+  #map-section {
+    padding: var(--gap-md) var(--gap-md) var(--gap-md) var(--gap-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+  }
+  
+  .map-title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--text-primary);
+  }
+  
+  /* Container that Rizvan's D3 SVG fills */
+  #map {
+    background: var(--bg-map);
+    border: 1px solid #e5d8ca;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    width: 100%;
+    /* Height will be set by map.js using getBoundingClientRect or a fixed value */
+    min-height: 380px;
+    flex: 1;
+    position: relative;
+  }
+  
+  /* D3 SVG injected by Rizvan should fill the container */
+  #map svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* ─── Region buttons ───────────────────────────────────────── */
+  #region-buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    flex-wrap: wrap;
+    padding: var(--gap-sm) 0;
+  }
+  
+  .region-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-right: 0.25rem;
+  }
+  
+  .region-btn {
+    appearance: none;
+    border: none;
+    border-radius: 2rem;
+    padding: 0.2rem 0.75rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: #e8ddd0;
+    color: var(--text-primary);
+    transition: background 0.15s, color 0.15s;
+  }
+  
+  .region-btn:hover {
+    background: #d4c5b0;
+  }
+  
+  /* Active region: Rizvan adds class "active" via setState → subscribe */
+  .region-btn.active {
+    background: var(--text-primary);
+    color: #fff;
+  }
+  
+  /* Per-region color dot on button (optional — Andrew can add if desired) */
+  .region-btn[data-region="Africa"]     { border-left: 3px solid var(--color-africa); }
+  .region-btn[data-region="Americas"]   { border-left: 3px solid var(--color-americas); }
+  .region-btn[data-region="Europe"]     { border-left: 3px solid var(--color-europe); }
+  .region-btn[data-region="S-E Asia"]   { border-left: 3px solid var(--color-se-asia); }
+  .region-btn[data-region="E. Med"]     { border-left: 3px solid var(--color-e-med); }
+  .region-btn[data-region="W. Pacific"] { border-left: 3px solid var(--color-w-pacific); }
+  
+  /* ─── Charts section (right column) ───────────────────────── */
+  #charts-section {
+    padding: var(--gap-md) var(--gap-lg) var(--gap-md) var(--gap-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg);
+    border-left: 1px solid rgba(0,0,0,0.06);
+  }
+  
+  .bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+  }
+  
+  .chart-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-primary);
+  }
+  
+  .chart-title .metric-name {
+    font-style: italic;
+  }
+  
+  /* Andrew's D3 bar SVGs fill these divs */
+  #bar-left,
+  #bar-right {
+    width: 100%;
+  }
+  
+  #bar-left svg,
+  #bar-right svg {
+    display: block;
+    width: 100%;
+  }
+  
+  /* ─── Bar legend ───────────────────────────────────────────── */
+  .bar-legend {
+    display: flex;
+    gap: var(--gap-md);
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+  
+  /* Andrew builds legend items in bar.js — pattern:
+     <span class="legend-item">
+       <span class="legend-swatch" style="background: var(--color-africa)"></span>
+       Africa
+     </span>
+  */
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  
+  .legend-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  
+  /* ─── Scatter section ──────────────────────────────────────── */
+  #scatter-section {
+    padding: var(--gap-md) var(--gap-lg);
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  
+  #scatter svg {
+    display: block;
+    width: 100%;
+  }
+  
+  /* ─── Tooltip ──────────────────────────────────────────────── */
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    z-index: 500;
+    background: var(--tooltip-bg);
+    border: 1px solid var(--tooltip-border);
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    box-shadow: 0 4px 16px var(--tooltip-shadow);
+    min-width: 180px;
+    max-width: 240px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.15s, transform 0.15s;
+    /* Hidden until Andrew adds class "visible" */
+  }
+  
+  .tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: none;
+  }
+  
+  .tooltip-hint {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+  }
+  
+  .tooltip-country {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--color-africa); /* Andrew overrides with per-region color */
+    margin-bottom: 0.2rem;
+  }
+  
+  .tooltip-region {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-africa); /* Andrew overrides */
+    margin-bottom: 0.4rem;
+  }
+  
+  .tooltip-stats {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  
+  /* ─── Detail panel ─────────────────────────────────────────── */
+  .detail-panel {
+    position: absolute;
+    z-index: 400;
+    top: calc(var(--header-h) + 3rem);
+    left: 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--tooltip-border);
+    border-radius: var(--border-radius);
+    padding: 1rem 1.25rem;
+    box-shadow: 0 6px 24px var(--bg-card-shadow);
+    min-width: 240px;
+    max-width: 300px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  
+  .detail-panel.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  
+  .detail-country {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--color-africa);  /* Andrew overrides with per-region color */
+    margin-bottom: 0.2rem;
+  }
+  
+  .detail-meta {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.6rem;
+  }
+  
+  .detail-region,
+  .detail-income {
+    font-weight: 600;
+  }
+  
+  .detail-crisis {
+    margin-bottom: 0.5rem;
+  }
+  
+  .detail-crisis > p {
+    font-size: 0.85rem;
+  }
+  
+  .detail-crisis-val {
+    font-size: 1.1rem;
+  }
+  
+  .detail-comparisons {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding-left: 0.75rem;
+    margin-top: 0.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  
+  .detail-divider {
+    border: none;
+    border-top: 1px solid var(--tooltip-border);
+    margin: 0.6rem 0;
+  }
+  
+  .detail-indicators h4 {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+  }
+  
+  .detail-indicators ul {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  
+  /* ─── D3 choropleth helpers ────────────────────────────────── */
+  /* Rizvan: these classes are applied by map.js to SVG path elements */
+  .country-path {
+    stroke: #fff;
+    stroke-width: 0.4px;
+    transition: stroke 0.1s, stroke-width 0.1s;
+    cursor: pointer;
+  }
+  
+  .country-path:hover,
+  .country-path.hovered {
+    stroke: rgba(0,0,0,0.4);
+    stroke-width: 1.2px;
+  }
+  
+  .country-path.selected {
+    stroke: var(--highlight-selected);
+    stroke-width: 2px;
+  }
+  
+  /* ─── D3 bar chart helpers ─────────────────────────────────── */
+  /* Andrew: these classes are applied by bar.js to rect / text elements */
+  .bar-rect {
+    transition: opacity 0.15s;
+  }
+  
+  .bar-rect.dimmed {
+    opacity: 0.25;
+  }
+  
+  .bar-rect.selected {
+    stroke: var(--highlight-selected);
+    stroke-width: 2px;
+  }
+  
+  .bar-label {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    fill: var(--text-primary);
+  }
+  
+  /* ─── Axis text (shared by map legend + bar + scatter) ─────── */
+  .axis text {
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    fill: var(--text-secondary);
+  }
+  
+  .axis line,
+  .axis path {
+    stroke: #d0c8be;
+  }
+  
+  /* ─── Utilities ────────────────────────────────────────────── */
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
+  /* ─── Responsive: single-column below ~900px ───────────────── */
+  @media (max-width: 900px) {
+    #app-main {
+      grid-template-columns: 1fr;
+    }
+  
+    #charts-section {
+      border-left: none;
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+  
+    #map-section {
+      padding: var(--gap-md);
+    }
+  
+    #charts-section {
+      padding: var(--gap-md);
+    }
+  
+    #app-header {
+      flex-wrap: wrap;
+      height: auto;
+      padding: var(--gap-sm) var(--gap-md);
+    }
+  
+    .metric-controls {
+      margin-left: 0;
+    }
+  
+    .detail-panel {
+      top: auto;
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+      max-width: none;
+    }
+  }
