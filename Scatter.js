@@ -221,7 +221,7 @@ function initScatter() {
       .attr("fill", "rgba(255,255,255,0.92)")
       .attr("stroke", "#cdbec4").attr("stroke-width", 0.5);
     const crossText = crossLabel.append("text")
-      .attr("font-size", "10px").attr("fill", "#47384c").attr("font-weight", "600");
+      .attr("font-size", "11px").attr("fill", "#47384c").attr("font-weight", "600");
 
     const SNAP_DISTANCE = 30;
 
@@ -269,11 +269,14 @@ function initScatter() {
         const pad = 5;
         crossText.text(labelText);
         const bbox = crossText.node().getBBox();
-        const lx = Math.min(cx + 8, width - bbox.width - pad * 2);
-        const ly = Math.max(cy - 10, bbox.height + pad);
-        crossBg.attr("x", lx - pad).attr("y", ly - bbox.height - pad + 2)
-          .attr("width", bbox.width + pad * 2).attr("height", bbox.height + pad);
-        crossText.attr("x", lx).attr("y", ly);
+        const tw = bbox.width + pad * 2;
+        const th = bbox.height + pad;
+        const lx = Math.max(0, Math.min(cx - tw / 2, width - tw));
+        const ly = Math.max(th, cy - 12); 
+
+        crossBg.attr("x", lx).attr("y", ly - th)
+          .attr("width", tw).attr("height", th);
+        crossText.attr("x", lx + pad).attr("y", ly - pad + 1);
       })
       .on("mouseleave", function () {
         crossG.style("display", "none");
