@@ -25,37 +25,7 @@
   <header id="app-header">
     <h1 class="site-title">Minds Across Borders</h1>
 
-    <nav class="metric-controls" aria-label="Metric selectors">
-      <!--
-        Dropdown for choropleth metric (map.js reads mapMetric from state).
-        Wire the change event to setState({ mapMetric: e.target.value }) in ui.js.
-      -->
 
-
-      <div class="metric-dropdown" id="ctrl-bar-left">
-        <label class="dropdown-label" for="select-bar-left">RANK1:</label>
-        <select id="select-bar-left" class="pill-select" aria-label="Left bar metric">
-          <option value="treatment_gap_pct">Treatment Gap (%)</option>
-          <option value="mh_crisis_index">Crisis Index</option>
-          <option value="depression_pct">Depression (%)</option>
-          <option value="anxiety_pct">Anxiety (%)</option>
-          <option value="suicide_rate_per100k">Suicide Rate</option>
-          <option value="youth_mh_crisis_score">Youth Crisis Score</option>
-        </select>
-      </div>
-
-      <div class="metric-dropdown" id="ctrl-bar-right">
-        <label class="dropdown-label" for="select-bar-right">RANK2:</label>
-        <select id="select-bar-right" class="pill-select" aria-label="Right bar metric">
-          <option value="psychiatrists_per100k">Psychiatrists/100k</option>
-          <option value="mh_budget_pct_health">MH Budget (%)</option>
-          <option value="mh_spend_usd_per_capita">Spend (USD/capita)</option>
-          <option value="mh_system_score">MH System Score</option>
-          <option value="mh_investment_gap">Investment Gap</option>
-          <option value="gdp_per_capita_usd">GDP/Capita (USD)</option>
-        </select>
-      </div>
-    </nav>
   </header>
 
   <!-- ─── Main layout ─────────────────────────────────────────────────────── -->
@@ -130,7 +100,15 @@
       <!-- Left bar chart: Illness ranking (treatment_gap_pct by default) -->
       <div id="bar-left-container" class="bar-container">
         <h2 class="chart-title" id="bar-left-title">
-          Illness Ranking (<span class="metric-name">treatment_gap_pct</span>)
+          Illness Ranking
+          <select id="select-bar-left" class="pill-select" aria-label="Left bar metric">
+            <option value="treatment_gap_pct">Treatment Gap (%)</option>
+            <option value="mh_crisis_index">Crisis Index</option>
+            <option value="depression_pct">Depression (%)</option>
+            <option value="anxiety_pct">Anxiety (%)</option>
+            <option value="suicide_rate_per100k">Suicide Rate</option>
+            <option value="youth_mh_crisis_score">Youth Crisis Score</option>
+          </select>
         </h2>
         <!-- Andrew mounts D3 bar chart here -->
         <div id="bar-left"></div>
@@ -141,7 +119,15 @@
       <!-- Right bar chart: Preparedness ranking (psychiatrists_per100k by default) -->
       <div id="bar-right-container" class="bar-container">
         <h2 class="chart-title" id="bar-right-title">
-          Preparedness Ranking (<span class="metric-name">psychiatrists_per100k</span>)
+          Preparedness Ranking
+          <select id="select-bar-right" class="pill-select" aria-label="Right bar metric">
+            <option value="psychiatrists_per100k">Psychiatrists/100k</option>
+            <option value="mh_budget_pct_health">MH Budget (%)</option>
+            <option value="mh_spend_usd_per_capita">Spend (USD/capita)</option>
+            <option value="mh_system_score">MH System Score</option>
+            <option value="mh_investment_gap">Investment Gap</option>
+            <option value="gdp_per_capita_usd">GDP/Capita (USD)</option>
+          </select>
         </h2>
         <!-- Andrew mounts D3 bar chart here -->
         <div id="bar-right"></div>

@@ -87,7 +87,7 @@
   ul { list-style: none; }
   
   /* ─── Header ───────────────────────────────────────────────── */
-  #app-header {
+#app-header {
     display: flex;
     align-items: center;
     gap: var(--gap-lg);
@@ -95,6 +95,7 @@
     height: var(--header-h);
     background: var(--bg-page);
     border-bottom: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -273,16 +274,20 @@
     flex-direction: column;
     gap: var(--gap-sm);
   }
-  
+
   .chart-title {
     font-family: var(--font-display);
-    font-size: 1rem;
-    font-weight: 400;
+    font-size: 1.25rem;
+    font-weight: 500;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
-  
-  .chart-title .metric-name {
-    font-style: italic;
+
+  .chart-title .pill-select {
+    font-size: 0.8rem;
+    vertical-align: middle;
   }
   
   /* Andrew's D3 bar SVGs fill these divs */

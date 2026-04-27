@@ -33,9 +33,7 @@ function initUI() {
   const ttRank2Value = tooltip.querySelector(".tt-rank2-value");
   const ttPop = tooltip.querySelector(".tt-pop");
 
-  // Chart title spans to update dynamically
-  const barLeftTitleSpan = document.querySelector("#bar-left-title .metric-name");
-  const barRightTitleSpan = document.querySelector("#bar-right-title .metric-name");
+  // Chart title span to update dynamically
   const mapTitleSpan = document.querySelector("#map-title-metric");
 
   let mouseX = 0;
@@ -175,12 +173,8 @@ function initUI() {
       tooltip.setAttribute("aria-hidden", "true");
     }
 
-    // Update the bar chart title spans to match the pretty labels
+    // Update map title span
     const mapMetric = state.mapMetric || "mh_crisis_index";
-    const rank1Metric = state.barLeftMetric || "treatment_gap_pct";
-    const rank2Metric = state.barRightMetric || "psychiatrists_per100k";
-    if (barLeftTitleSpan) barLeftTitleSpan.textContent = metricLabels[rank1Metric] || rank1Metric;
-    if (barRightTitleSpan) barRightTitleSpan.textContent = metricLabels[rank2Metric] || rank2Metric;
     if (mapTitleSpan) mapTitleSpan.textContent = metricLabels[mapMetric] || mapMetric;
 
     // --- Detail Panel Logic ---

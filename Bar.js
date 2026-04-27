@@ -28,6 +28,22 @@ window.initBar = function () {
     // Color scale
     const color = window.regionColors || d3.scaleOrdinal(d3.schemeTableau10);
 
+    // Track previous state to skip re-render on hover-only changes
+    let prevBarLeftMetric = null;
+    let prevBarRightMetric = null;
+    let prevSelectedId = undefined;
+    let prevFocusedRegion = undefined;
+    let prevDataLength = 0;
+
+    // Safety net: clear hover when mouse leaves the container divs
+    // These divs are persistent (never destroyed), unlike SVG children
+    d3.select("#bar-left").on("mouseleave", () => {
+        if (getState().hoveredId) setState({ hoveredId: null });
+    });
+    d3.select("#bar-right").on("mouseleave", () => {
+        if (getState().hoveredId) setState({ hoveredId: null });
+    });
+
     // ─────────────────────────────────────────────
     // Update (runs on state changes)
     // ─────────────────────────────────────────────
@@ -36,6 +52,23 @@ window.initBar = function () {
         const key = state.countryKey;
 
         if (!data.length || !key) return;
+
+        // Skip full re-render if only hoveredId changed
+        // (re-rendering destroys bars under the cursor, breaking mouseleave)
+        const needsRender =
+            prevBarLeftMetric !== state.barLeftMetric ||
+            prevBarRightMetric !== state.barRightMetric ||
+            prevSelectedId !== state.selectedId ||
+            prevFocusedRegion !== state.focusedRegion ||
+            prevDataLength !== data.length;
+
+        if (!needsRender) return;
+
+        prevBarLeftMetric = state.barLeftMetric;
+        prevBarRightMetric = state.barRightMetric;
+        prevSelectedId = state.selectedId;
+        prevFocusedRegion = state.focusedRegion;
+        prevDataLength = data.length;
 
         renderChart(
             svgLeft,
@@ -116,10 +149,10 @@ window.initBar = function () {
             .attr("stroke-width", d =>
                 state.selectedId === d[key] ? 2 : 0
             )
-            .on("mouseover", (event, d) => {
+            .on("mouseenter", (event, d) => {
                 setState({ hoveredId: d[key] });
             })
-            .on("mouseout", () => {
+            .on("mouseleave", () => {
                 setState({ hoveredId: null });
             })
             .on("click", (event, d) => {
@@ -129,9 +162,7 @@ window.initBar = function () {
                 });
             });
 
-        // Update title metric label
-        d3.select(`#${titleId} .metric-name`)
-            .text(metric);
+
 
         // ─────────────────────────────────────────────
         // Optional: auto-scroll to selected country
