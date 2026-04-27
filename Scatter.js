@@ -37,6 +37,8 @@ function initScatter() {
     "W. Pacific": "var(--color-w-pacific)"
   };
 
+  window.regionColors = regionColors;
+
   const metricLabels = {
     mh_crisis_index: "Crisis Index",
     treatment_gap_pct: "Treatment Gap (%)",

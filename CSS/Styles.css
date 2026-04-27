@@ -286,10 +286,18 @@
   }
   
   /* Andrew's D3 bar SVGs fill these divs */
-  #bar-left,
-  #bar-right {
+  /*#bar-left,*/
+  /*#bar-right {*/
+  /*  width: 100%;*/
+  /*}*/
+
+#bar-left,
+#bar-right {
+    height: 45vh;
     width: 100%;
-  }
+    overflow-y: auto;
+    overflow-x: hidden;
+}
   
   #bar-left svg,
   #bar-right svg {
