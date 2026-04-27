@@ -25,7 +25,10 @@
   <header id="app-header">
     <h1 class="site-title">Minds Across Borders</h1>
 
-
+    <nav class="header-actions" aria-label="Info actions">
+      <button id="btn-source" class="header-btn" aria-label="Data sources">📊 Source</button>
+      <button id="btn-about" class="header-btn" aria-label="About this project">ℹ️ About</button>
+    </nav>
   </header>
 
   <!-- ─── Main layout ─────────────────────────────────────────────────────── -->
@@ -202,6 +205,39 @@
         <li><span>Youth Crisis Score:</span> <span class="di-youth"></span></li>
         <li><span>Investment Gap:</span> <span class="di-investment"></span></li>
       </ul>
+    </div>
+  </div>
+
+  <!-- ─── Source Modal ─────────────────────────────────────────────────── -->
+  <div id="modal-source" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card">
+      <button class="modal-close" aria-label="Close">×</button>
+      <h2 class="modal-title">Data Sources</h2>
+      <ul class="source-list">
+        <li><strong>WHO Mental Health Atlas 2024</strong> — Global mental health workforce, policy, and legislation data</li>
+        <li><strong>GBD Study 2023 (IHME)</strong> — Depression, anxiety, and suicide burden estimates</li>
+        <li><strong>Our World in Data (Mar 2026)</strong> — GDP, internet penetration, population figures</li>
+        <li><strong>OECD 2024</strong> — Health expenditure and mental health budget allocations</li>
+        <li><strong>DataReportal 2025</strong> — Social media usage statistics</li>
+      </ul>
+      <p class="source-note">Dataset: <em>Global Mental Health Crisis Index 2026</em> — compiled from the above sources covering 100+ countries.</p>
+    </div>
+  </div>
+
+  <!-- ─── About Modal ──────────────────────────────────────────────────── -->
+  <div id="modal-about" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card">
+      <button class="modal-close" aria-label="Close">×</button>
+      <h2 class="modal-title">About This Project</h2>
+      <p>"Minds Across Borders" is an interactive visual analytics dashboard exploring the global mental health crisis. It compares countries across treatment gaps, psychiatric resources, and socioeconomic factors using coordinated views:</p>
+      <ul class="about-features">
+        <li><strong>Choropleth Map</strong> — Color-coded country comparison with multiple metrics</li>
+        <li><strong>Scatter Plot</strong> — Explore relationships between variables with size-encoded bubbles</li>
+        <li><strong>Bar Rankings</strong> — Sortable illness and preparedness rankings by region</li>
+      </ul>
+      <hr class="modal-divider" />
+      <p class="about-team"><strong>Team:</strong> Rizvan Ahmed Rafsan, Sasivadhan, Andrew Levner</p>
+      <p class="about-course">CPSC 5320 · Visual Analytics · Seattle University · Spring 2026</p>
     </div>
   </div>
 
