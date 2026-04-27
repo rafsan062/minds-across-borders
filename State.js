@@ -37,6 +37,10 @@
  *                                  Controls region-filter buttons under the map.
  *                                  Set by: map.js (region buttons) or ui.js if UI owns them.
  *
+ *  peerMode        string          "region" | "income" — controls which peer group the
+ *                                  scatter plot highlights when a country is selected.
+ *                                  Default: "region". Toggled via a control near the scatter.
+ *
  *  mapMetric       string          CSV column used for choropleth fill.
  *                                  Default: "mh_crisis_index".
  *
@@ -76,6 +80,7 @@ const _state = {
     focusedRegion:   null,
     hoveredLegendIndex: null,   // index of legend color segment being hovered
     previousFocusedRegion: null, // saved region when entering country detail
+    peerMode:        "region",     // "region" | "income" — scatter peer highlight mode
   
     // Metric selections (matching dropdown defaults in mockup)
     mapMetric:       "mh_crisis_index",

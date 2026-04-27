@@ -299,8 +299,73 @@ function initUI() {
     });
   }
 
+  // Wire peer-mode toggle buttons
+  const peerToggle = document.getElementById("peer-mode-toggle");
+  if (peerToggle) {
+    const peerBtns = peerToggle.querySelectorAll(".peer-btn");
+    peerBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mode = btn.dataset.peer;
+        setState({ peerMode: mode });
+        // Update active class
+        peerBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    // Keep toggle in sync with state on every render
+    subscribe((state) => {
+      const mode = state.peerMode || "region";
+      peerBtns.forEach(b => {
+        b.classList.toggle("active", b.dataset.peer === mode);
+      });
+    });
+  }
+
   subscribe(renderUI);
   renderUI();
+
+  // ─── Modal open / close ────────────────────────────────────
+  function setupModal(btnId, modalId) {
+    const btn = document.getElementById(btnId);
+    const modal = document.getElementById(modalId);
+    if (!btn || !modal) return;
+
+    btn.addEventListener("click", () => {
+      modal.classList.add("visible");
+      modal.setAttribute("aria-hidden", "false");
+    });
+
+    // Close on × button
+    const closeBtn = modal.querySelector(".modal-close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        modal.classList.remove("visible");
+        modal.setAttribute("aria-hidden", "true");
+      });
+    }
+
+    // Close on backdrop click
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.remove("visible");
+        modal.setAttribute("aria-hidden", "true");
+      }
+    });
+  }
+
+  setupModal("btn-source", "modal-source");
+  setupModal("btn-about", "modal-about");
+
+  // Close any open modal on Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".modal-overlay.visible").forEach((m) => {
+        m.classList.remove("visible");
+        m.setAttribute("aria-hidden", "true");
+      });
+    }
+  });
 }
 
 window.initUI = initUI;

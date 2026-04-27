@@ -37,6 +37,14 @@ function initScatter() {
     "W. Pacific": "var(--color-w-pacific)"
   };
 
+  // Income Group Colors
+  const incomeColors = {
+    "High": "#6ECA97",
+    "Upper-Middle": "#ab4f82",
+    "Lower-Middle": "#e59aa5",
+    "Low": "#efbec0"
+  };
+
   window.regionColors = regionColors;
 
   const metricLabels = {
@@ -108,14 +116,29 @@ function initScatter() {
     xAxisG.transition().duration(500).call(xAxis);
     yAxisG.transition().duration(500).call(yAxis);
 
-    // ── Benchmark reference lines ─────────────────────────────────
+    const peerMode = state.peerMode || "region";
+
+    // ── Benchmark reference lines ─────────────────────────────────────
     benchmarkG.selectAll("*").remove();
 
-    // Use region-filtered data if a region is focused, else global
-    const benchData = state.focusedRegion
-      ? validData.filter(d => d.region === state.focusedRegion)
-      : validData;
-    const benchLabel = state.focusedRegion ? "Region Avg" : "Global Avg";
+    // Determine benchmark data based on peer mode and selection
+    let benchData, benchLabel;
+    if (state.selectedId && peerMode === "income") {
+      const selectedRow = state.rowById?.get(state.selectedId);
+      if (selectedRow) {
+        benchData = validData.filter(d => d.income_group === selectedRow.income_group);
+        benchLabel = `${selectedRow.income_group} Avg`;
+      } else {
+        benchData = validData;
+        benchLabel = "Global Avg";
+      }
+    } else if (state.focusedRegion) {
+      benchData = validData.filter(d => d.region === state.focusedRegion);
+      benchLabel = "Region Avg";
+    } else {
+      benchData = validData;
+      benchLabel = "Global Avg";
+    }
 
     if (benchData.length > 0) {
       const xValues = benchData.map(d => Number(d[xMetric])).filter(Number.isFinite);
@@ -155,6 +178,12 @@ function initScatter() {
     const dots = dotsG.selectAll(".scatter-dot")
       .data(validData, d => d.iso3);
 
+    // Color function based on peer mode
+    const dotColor = d => {
+      if (peerMode === "income") return incomeColors[d.income_group] || "#999";
+      return regionColors[d.region] || "#999";
+    };
+
     // Enter
     const dotsEnter = dots.enter()
       .append("circle")
@@ -162,7 +191,7 @@ function initScatter() {
       .attr("cx", d => xScale(Number(d[xMetric])))
       .attr("cy", d => yScale(Number(d[yMetric])))
       .attr("r", 0)
-      .attr("fill", d => regionColors[d.region] || "#999")
+      .attr("fill", dotColor)
       .style("stroke", "white")
       .style("stroke-width", "0.5px")
       .style("cursor", "pointer")
@@ -183,7 +212,8 @@ function initScatter() {
       .transition().duration(500)
       .attr("cx", d => xScale(Number(d[xMetric])))
       .attr("cy", d => yScale(Number(d[yMetric])))
-      .attr("r", d => sizeScale(Number(d[sizeMetric])));
+      .attr("r", d => sizeScale(Number(d[sizeMetric])))
+      .attr("fill", dotColor);
 
     // Remove
     dots.exit().transition().duration(300).attr("r", 0).remove();
@@ -201,13 +231,16 @@ function initScatter() {
         return "0.5px";
       })
       .attr("opacity", d => {
-        // If a region is focused, dim others
+        // If a region is focused (and not in income peer mode), dim others
         if (state.focusedRegion && d.region !== state.focusedRegion) return 0.1;
-        // If something is selected, highlight peers
+        // If something is selected, highlight peers based on peerMode
         if (state.selectedId) {
           if (d.iso3 === state.selectedId) return 1;
           const selectedRow = state.rowById?.get(state.selectedId);
-          if (selectedRow && d.region === selectedRow.region) return 0.55;
+          if (selectedRow) {
+            if (peerMode === "income" && d.income_group === selectedRow.income_group) return 0.55;
+            if (peerMode === "region" && d.region === selectedRow.region) return 0.55;
+          }
           return 0.12;
         }
         // If hovering, slightly dim others
