@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,13 +9,16 @@
   <!-- Google Fonts: editorial display + refined body (matching mockup serif title) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
 
   <!-- D3 v7 — must load before all js/ modules -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="CSS/Styles.css" />
 </head>
+
 <body>
 
   <!-- ─── Header ──────────────────────────────────────────────────────────── -->
@@ -26,42 +30,29 @@
         Dropdown for choropleth metric (map.js reads mapMetric from state).
         Wire the change event to setState({ mapMetric: e.target.value }) in ui.js.
       -->
-      <div class="metric-dropdown" id="ctrl-map-metric">
-        <label class="dropdown-label" for="select-map-metric">MAP:</label>
-        <select id="select-map-metric" class="pill-select" aria-label="Map metric">
-          <option value="mh_crisis_index">mh_crisis_index</option>
-          <option value="treatment_gap_pct">treatment_gap_pct</option>
-          <option value="psychiatrists_per100k">psychiatrists_per100k</option>
-          <option value="depression_pct">depression_pct</option>
-          <option value="anxiety_pct">anxiety_pct</option>
-          <option value="suicide_rate_per100k">suicide_rate_per100k</option>
-          <option value="mh_budget_pct_health">mh_budget_pct_health</option>
-          <option value="youth_mh_crisis_score">youth_mh_crisis_score</option>
-          <option value="mh_system_score">mh_system_score</option>
-        </select>
-      </div>
+
 
       <div class="metric-dropdown" id="ctrl-bar-left">
         <label class="dropdown-label" for="select-bar-left">RANK1:</label>
         <select id="select-bar-left" class="pill-select" aria-label="Left bar metric">
-          <option value="treatment_gap_pct">treatment_gap_pct</option>
-          <option value="mh_crisis_index">mh_crisis_index</option>
-          <option value="depression_pct">depression_pct</option>
-          <option value="anxiety_pct">anxiety_pct</option>
-          <option value="suicide_rate_per100k">suicide_rate_per100k</option>
-          <option value="youth_mh_crisis_score">youth_mh_crisis_score</option>
+          <option value="treatment_gap_pct">Treatment Gap (%)</option>
+          <option value="mh_crisis_index">Crisis Index</option>
+          <option value="depression_pct">Depression (%)</option>
+          <option value="anxiety_pct">Anxiety (%)</option>
+          <option value="suicide_rate_per100k">Suicide Rate</option>
+          <option value="youth_mh_crisis_score">Youth Crisis Score</option>
         </select>
       </div>
 
       <div class="metric-dropdown" id="ctrl-bar-right">
         <label class="dropdown-label" for="select-bar-right">RANK2:</label>
         <select id="select-bar-right" class="pill-select" aria-label="Right bar metric">
-          <option value="psychiatrists_per100k">psychiatrists_per100k</option>
-          <option value="mh_budget_pct_health">mh_budget_pct_health</option>
-          <option value="mh_spend_usd_per_capita">mh_spend_usd_per_capita</option>
-          <option value="mh_system_score">mh_system_score</option>
-          <option value="mh_investment_gap">mh_investment_gap</option>
-          <option value="gdp_per_capita_usd">gdp_per_capita_usd</option>
+          <option value="psychiatrists_per100k">Psychiatrists/100k</option>
+          <option value="mh_budget_pct_health">MH Budget (%)</option>
+          <option value="mh_spend_usd_per_capita">Spend (USD/capita)</option>
+          <option value="mh_system_score">MH System Score</option>
+          <option value="mh_investment_gap">Investment Gap</option>
+          <option value="gdp_per_capita_usd">GDP/Capita (USD)</option>
         </select>
       </div>
     </nav>
@@ -72,12 +63,54 @@
 
     <!-- Left column: map + region filter buttons -->
     <section id="map-section" aria-label="World choropleth map">
-      <h2 class="map-title">Mental Health Crisis Index by Country</h2>
+      <div class="map-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 class="map-title"><span id="map-title-metric">Crisis Index</span> by Country</h2>
+        <div class="metric-dropdown" id="ctrl-map-metric">
+          <label class="dropdown-label" for="select-map-metric">MAP:</label>
+          <select id="select-map-metric" class="pill-select" aria-label="Map metric">
+            <option value="mh_crisis_index">Crisis Index</option>
+            <option value="treatment_gap_pct">Treatment Gap (%)</option>
+            <option value="psychiatrists_per100k">Psychiatrists/100k</option>
+            <option value="depression_pct">Depression (%)</option>
+            <option value="anxiety_pct">Anxiety (%)</option>
+            <option value="suicide_rate_per100k">Suicide Rate</option>
+            <option value="mh_budget_pct_health">MH Budget (%)</option>
+            <option value="youth_mh_crisis_score">Youth Crisis Score</option>
+            <option value="mh_system_score">MH System Score</option>
+          </select>
+        </div>
+      </div>
 
       <!-- Rizvan mounts the D3 choropleth SVG here -->
       <div id="map"></div>
 
-      <!-- Legend is rendered inside #map by map.js -->
+      <!-- Scatter Section -->
+      <div id="scatter-section" aria-label="Scatter plot">
+        <div id="scatter">
+          <select id="select-scatter-y" class="inline-axis-select axis-y" aria-label="Y-Axis Metric">
+            <option value="mh_crisis_index">Crisis Index</option>
+            <option value="treatment_gap_pct">Treatment Gap (%)</option>
+            <option value="suicide_rate_per100k">Suicide Rate</option>
+            <option value="youth_mh_crisis_score">Youth Crisis Score</option>
+          </select>
+          
+          <select id="select-scatter-x" class="inline-axis-select axis-x" aria-label="X-Axis Metric">
+            <option value="gdp_per_capita_usd">GDP/Capita (USD)</option>
+            <option value="internet_penetration_pct">Internet Penetration (%)</option>
+            <option value="social_media_hours_daily">Social Media (Hours)</option>
+            <option value="mh_spend_usd_per_capita">MH Spend (USD)</option>
+          </select>
+          
+          <div id="scatter-size-ctrl" class="inline-axis-select axis-size">
+            <label for="select-scatter-size">Bubble Size: </label>
+            <select id="select-scatter-size">
+              <option value="total_affected_millions">Affected (Millions)</option>
+              <option value="population_millions">Population (Millions)</option>
+              <option value="none">Fixed</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
       <!-- Region focus buttons — Rizvan wires click → setState({ focusedRegion }) -->
       <div id="region-buttons" role="group" aria-label="Filter by region">
@@ -123,14 +156,18 @@
     Hidden by default via CSS; shown with class "visible".
   -->
   <div id="tooltip" class="tooltip" role="tooltip" aria-live="polite" aria-hidden="true">
-    <p class="tooltip-hint">(Hover over tooltip)</p>
     <h3 class="tooltip-country"></h3>
     <p class="tooltip-region"></p>
+    
+    <div class="tt-primary-metric">
+      <span class="tt-primary-label"></span>
+      <strong class="tt-primary-value"></strong>
+    </div>
+
     <ul class="tooltip-stats">
-      <li>Crisis Index: <span class="tt-crisis"></span></li>
-      <li>Treatment Gap: <span class="tt-gap"></span></li>
-      <li>Psychiatrists/100k: <span class="tt-psych"></span></li>
-      <li>Budget: <span class="tt-budget"></span></li>
+      <li><span class="tt-rank1-label"></span>: <strong class="tt-rank1-value"></strong></li>
+      <li><span class="tt-rank2-label"></span>: <strong class="tt-rank2-value"></strong></li>
+      <li>Population: <strong class="tt-pop"></strong> M</li>
     </ul>
   </div>
 
@@ -169,27 +206,19 @@
     </div>
   </div>
 
-  <!--
-    Scatter plot section (below map, per plan).
-    Rizvan mounts initScatter here. Placed after main layout so it can be
-    added to the DOM without breaking the two-column grid above.
-  -->
-  <section id="scatter-section" aria-label="Scatter plot">
-    <div id="scatter"></div>
-  </section>
-
   <!-- ─── Script load order ────────────────────────────────────────────────
     CRITICAL: state.js must load FIRST so getState / setState / subscribe
     are available as globals before any feature module runs.
     main.js loads LAST — it calls the four init* functions after all modules
     have registered those functions on window.
   ──────────────────────────────────────────────────────────────────────── -->
-  <script src="js/state.js"></script>    <!-- Sasi: getState / setState / subscribe -->
-  <script src="js/map.js"></script>      <!-- Rizvan: window.initMap -->
-  <script src="js/scatter.js"></script>  <!-- Rizvan: window.initScatter -->
-  <script src="js/bar.js"></script>      <!-- Andrew: window.initBar -->
-  <script src="js/ui.js"></script>       <!-- Andrew: window.initUI -->
-  <script src="js/main.js"></script>     <!-- Sasi/Rizvan/Andrew: boot() -->
+  <script src="State.js"></script> <!-- Sasi: getState / setState / subscribe -->
+  <script src="Map.js"></script> <!-- Rizvan: window.initMap -->
+  <script src="Scatter.js"></script> <!-- Rizvan: window.initScatter -->
+  <script src="Bar.js"></script> <!-- Andrew: window.initBar -->
+  <script src="UI.js"></script> <!-- Andrew: window.initUI -->
+  <script src="Main.js"></script> <!-- Sasi/Rizvan/Andrew: boot() -->
 
 </body>
+
 </html>

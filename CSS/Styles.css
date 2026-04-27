@@ -10,8 +10,8 @@
 /* ─── Design tokens ────────────────────────────────────────── */
 :root {
     /* Background */
-    --bg-page:         #fdf6ec;   /* warm cream from mockup */
-    --bg-map:          #fdf0e0;   /* slightly warmer inside map frame */
+    --bg-page:         #fdf0e0;   /* slightly warmer inside map frame */
+    --bg-map:          #ffffff;   /* warm cream from mockup */
     --bg-card:         #ffffff;
     --bg-card-shadow:  rgba(0, 0, 0, 0.10);
   
@@ -176,7 +176,6 @@
     display: grid;
     grid-template-columns: var(--map-col-w) var(--chart-col-w);
     gap: 0;
-    min-height: calc(100vh - var(--header-h));
   }
   
   /* ─── Map section (left column) ────────────────────────────── */
@@ -201,9 +200,7 @@
     border-radius: var(--border-radius);
     overflow: hidden;
     width: 100%;
-    /* Height will be set by map.js using getBoundingClientRect or a fixed value */
-    min-height: 380px;
-    flex: 1;
+    aspect-ratio: 2.1 / 1;
     position: relative;
   }
   
@@ -333,10 +330,84 @@
   
   /* ─── Scatter section ──────────────────────────────────────── */
   #scatter-section {
-    padding: var(--gap-md) var(--gap-lg);
-    border-top: 1px solid rgba(0,0,0,0.06);
+    padding: 0;
+    margin-top: var(--gap-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
   
+  #scatter {
+    position: relative;
+    width: 100%;
+  }
+
+  .inline-axis-select {
+    position: absolute;
+    z-index: 10;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--text-secondary);
+    cursor: pointer;
+    outline: none;
+    padding: 0 0 2px 0;
+  }
+  
+  .inline-axis-select:hover {
+    color: var(--primary-accent);
+    border-bottom-color: var(--primary-accent);
+  }
+
+  .axis-y {
+    top: 50%;
+    left: 5px;
+    transform-origin: left top;
+    transform: rotate(-90deg) translateX(-50%);
+  }
+
+  .axis-x {
+    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .axis-size {
+    top: 10px;
+    right: 20px;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .axis-size label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+  }
+  
+  .axis-size select {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--text-secondary);
+    cursor: pointer;
+    outline: none;
+  }
+  
+  #scatter .axis text {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
   #scatter svg {
     display: block;
     width: 100%;
@@ -367,31 +438,51 @@
   }
   
   .tooltip-hint {
-    font-size: 0.68rem;
+    font-size: 0.83rem;
     color: var(--text-muted);
     margin-bottom: 0.25rem;
   }
   
   .tooltip-country {
     font-family: var(--font-display);
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     color: var(--color-africa); /* Andrew overrides with per-region color */
     margin-bottom: 0.2rem;
   }
   
   .tooltip-region {
-    font-size: 0.75rem;
+    font-size: 0.90rem;
     font-weight: 600;
     color: var(--color-africa); /* Andrew overrides */
     margin-bottom: 0.4rem;
   }
   
   .tooltip-stats {
-    font-size: 0.78rem;
+    font-size: 0.93rem;
     color: var(--text-secondary);
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.2rem;
+  }
+  
+  .tt-primary-metric {
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  
+  .tt-primary-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+  
+  .tt-divider {
+    border: none;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    margin: 0.4rem 0 0.6rem 0;
   }
   
   /* ─── Detail panel ─────────────────────────────────────────── */
@@ -494,8 +585,7 @@
   
   .country-path:hover,
   .country-path.hovered {
-    stroke: rgba(0,0,0,0.4);
-    stroke-width: 1.2px;
+    /* Hover styling is controlled in Map.js via state (hoveredId). */
   }
   
   .country-path.selected {

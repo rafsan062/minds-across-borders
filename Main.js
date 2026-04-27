@@ -17,7 +17,7 @@
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const CSV_PATH     = "data/Global_Mental_Health_Crisis_Index_2026.csv";
-const GEOJSON_PATH = "geo/world-110m.json";   // ← Rizvan: confirm GeoJSON source
+const GEOJSON_PATH = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
 
 // "iso3" is confirmed in the dataset (MWI, MOZ, ETH…) and is the standard
 // join key for most world GeoJSON files (Natural Earth, topojson/world-atlas).
