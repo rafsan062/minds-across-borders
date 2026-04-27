@@ -350,7 +350,7 @@ ul {
 
 .map-title {
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: calc(1.5rem);
   font-weight: 400;
   color: var(--text-primary);
 }
@@ -521,7 +521,7 @@ ul {
 
 /* ─── Scatter section ──────────────────────────────────────── */
 #scatter-section {
-  padding: 20px 0 0 0;
+  padding: 0;
   margin-top: var(--gap-sm);
   display: flex;
   flex-direction: column;

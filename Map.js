@@ -75,8 +75,8 @@ function initMap() {
     .append("div")
     .attr("class", "map-legend-overlay")
     .style("position", "absolute")
-    .style("top", "13px")
-    .style("right", `${resetButtonWidth + 30}px`)
+    .style("bottom", "13px")
+    .style("right", "15px")
     .style("z-index", "10")
     .style("display", "flex")
     .style("flex-direction", "column")
@@ -174,9 +174,12 @@ function initMap() {
 
     selectorRow
       .append("span")
-      .style("font-size", "8px")
-      .style("color", "#7D6983")
-      .text(paletteDropdownOpen ? "▲" : "▼");
+      .style("display", "flex")
+      .style("align-items", "center")
+      .html(paletteDropdownOpen
+        ? `<svg width="10" height="6" xmlns="http://www.w3.org/2000/svg"><path d="M0 0l5 6 5-6z" fill="#7D6983"/></svg>`
+        : `<svg width="10" height="6" xmlns="http://www.w3.org/2000/svg"><path d="M0 6l5-6 5 6z" fill="#7D6983"/></svg>`
+      );
 
     // ── Legend color bar (interactive segments) ──────────────────
     const bar = legendOverlay
@@ -241,9 +244,9 @@ function initMap() {
         .append("div")
         .attr("class", "palette-dropdown")
         .style("position", "absolute")
-        .style("top", "100%")
+        .style("bottom", "100%")
         .style("right", "0")
-        .style("margin-top", "4px")
+        .style("margin-bottom", "4px")
         .style("background", "rgba(255,255,255,0.98)")
         .style("border", "1px solid #cdbec4")
         .style("border-radius", "8px")
@@ -332,7 +335,7 @@ function initMap() {
 
     projection.fitSize([width, height], { type: "FeatureCollection", features });
     const [tx, ty] = projection.translate();
-    projection.translate([tx - 50, ty + 10]);
+    projection.translate([tx - 50, ty - 20]);
 
     const metric = state.mapMetric || "mh_crisis_index";
 
