@@ -99,7 +99,15 @@ window.initBar = function () {
 
         // Filter + sort ALL countries
         const filtered = data
-            .filter(d => d[metric] != null && !isNaN(d[metric]))
+            .filter(d => {
+                // metric must exist
+                const validMetric = d[metric] != null && !isNaN(d[metric]);
+
+                // region filter (if one is selected)
+                const regionMatch = !state.focusedRegion || d.region === state.focusedRegion;
+
+                return validMetric && regionMatch;
+            })
             .sort((a, b) => d3.descending(+a[metric], +b[metric]));
 
         const chartHeight = filtered.length * rowHeight;
@@ -111,7 +119,7 @@ window.initBar = function () {
         // Scales
         const x = d3.scaleLinear()
             .domain([0, d3.max(filtered, d => +d[metric]) || 0])
-            .range([0, width]);
+            .range([0, containerWidth * 0.7]);
 
         const y = d3.scaleBand()
             .domain(filtered.map(d => d[nameField]))
@@ -125,7 +133,7 @@ window.initBar = function () {
         svg.append("g")
             .call(d3.axisLeft(y).tickSize(0))
             .selectAll("text")
-            .style("font-size", "10px");
+            .style("font-size", `${Math.min(14, rowHeight * 0.7)}px`);
 
         // X axis
         svg.append("g")
