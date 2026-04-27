@@ -2,7 +2,7 @@ function initScatter() {
   const container = d3.select("#scatter");
   if (container.empty()) return;
 
-  const margin = { top: 20, right: 20, bottom: 40, left: 70 };
+  const margin = { top: 60, right: 20, bottom: 40, left: 70 };
   
   const fullHeight = 350; 
   const height = fullHeight - margin.top - margin.bottom;
@@ -118,61 +118,8 @@ function initScatter() {
 
     const peerMode = state.peerMode || "region";
 
-    // ── Benchmark reference lines ─────────────────────────────────────
+    // ── Benchmark reference lines removed ─────────────────────────────
     benchmarkG.selectAll("*").remove();
-
-    // Determine benchmark data based on peer mode and selection
-    let benchData, benchLabel;
-    if (state.selectedId && peerMode === "income") {
-      const selectedRow = state.rowById?.get(state.selectedId);
-      if (selectedRow) {
-        benchData = validData.filter(d => d.income_group === selectedRow.income_group);
-        benchLabel = `${selectedRow.income_group} Avg`;
-      } else {
-        benchData = validData;
-        benchLabel = "Global Avg";
-      }
-    } else if (state.focusedRegion) {
-      benchData = validData.filter(d => d.region === state.focusedRegion);
-      benchLabel = "Region Avg";
-    } else {
-      benchData = validData;
-      benchLabel = "Global Avg";
-    }
-
-    if (benchData.length > 0) {
-      const xValues = benchData.map(d => Number(d[xMetric])).filter(Number.isFinite);
-      const yValues = benchData.map(d => Number(d[yMetric])).filter(Number.isFinite);
-      const xAvg = xValues.reduce((a, b) => a + b, 0) / xValues.length;
-      const yAvg = yValues.reduce((a, b) => a + b, 0) / yValues.length;
-
-      // Vertical line for X average
-      benchmarkG.append("line")
-        .attr("x1", xScale(xAvg)).attr("x2", xScale(xAvg))
-        .attr("y1", 0).attr("y2", height)
-        .attr("stroke", "#ab4f82")
-        .attr("stroke-width", 1)
-        .attr("stroke-dasharray", "4,3")
-        .attr("opacity", 0.45);
-      benchmarkG.append("text")
-        .attr("x", xScale(xAvg) + 4).attr("y", 12)
-        .attr("fill", "#ab4f82").attr("font-size", "9px").attr("font-weight", "600")
-        .text(`${benchLabel}: ${xAvg.toFixed(1)}`);
-
-      // Horizontal line for Y average
-      benchmarkG.append("line")
-        .attr("x1", 0).attr("x2", width)
-        .attr("y1", yScale(yAvg)).attr("y2", yScale(yAvg))
-        .attr("stroke", "#ab4f82")
-        .attr("stroke-width", 1)
-        .attr("stroke-dasharray", "4,3")
-        .attr("opacity", 0.45);
-      benchmarkG.append("text")
-        .attr("x", width - 4).attr("y", yScale(yAvg) - 4)
-        .attr("fill", "#ab4f82").attr("font-size", "9px").attr("font-weight", "600")
-        .attr("text-anchor", "end")
-        .text(`${benchLabel}: ${yAvg.toFixed(1)}`);
-    }
 
     // Join
     const dots = dotsG.selectAll(".scatter-dot")

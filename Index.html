@@ -74,17 +74,30 @@
             <option value="mh_spend_usd_per_capita">MH Spend (USD)</option>
           </select>
           
-          <div id="scatter-size-ctrl" class="inline-axis-select axis-size">
-            <label for="select-scatter-size">Bubble Size: </label>
-            <select id="select-scatter-size">
-              <option value="total_affected_millions">Affected (Millions)</option>
-              <option value="population_millions">Population (Millions)</option>
-              <option value="none">Fixed</option>
-            </select>
+          <div style="position: absolute; top: 10px; right: 20px; z-index: 10; display: flex; align-items: center; gap: 20px;">
+            <div id="peer-mode-toggle" class="peer-mode-toggle" aria-label="Peer comparison mode">
+              <span class="peer-mode-label" style="font-size: 0.95rem;">Dot Color:</span>
+              <button class="peer-btn active" data-peer="region">Region</button>
+              <button class="peer-btn" data-peer="income">Income</button>
+            </div>
+
+            <div id="scatter-size-ctrl" class="axis-size" style="position: relative; top: auto; right: auto;">
+              <label for="select-scatter-size">Bubble Size: </label>
+              <select id="select-scatter-size" class="inline-axis-select" style="position: relative;">
+                <option value="total_affected_millions">Affected (Millions)</option>
+                <option value="population_millions">Population (Millions)</option>
+                <option value="none">Fixed</option>
+              </select>
+            </div>
           </div>
           </div>
         </div>
       </div>
+
+    </section>
+
+    <!-- Right column: bar charts -->
+    <section id="charts-section" aria-label="Country ranking charts">
 
       <!-- Region focus buttons — Rizvan wires click → setState({ focusedRegion }) -->
       <div id="region-buttons" role="group" aria-label="Filter by region">
@@ -96,18 +109,7 @@
         <button class="region-btn" data-region="E. Med">E. Med</button>
         <button class="region-btn" data-region="W. Pacific">W. Pacific</button>
 
-        <span class="region-buttons-divider"></span>
-
-        <div id="peer-mode-toggle" class="peer-mode-toggle" aria-label="Peer comparison mode">
-          <span class="peer-mode-label">Scatter Peers:</span>
-          <button class="peer-btn active" data-peer="region">Region</button>
-          <button class="peer-btn" data-peer="income">Income</button>
-        </div>
       </div>
-    </section>
-
-    <!-- Right column: bar charts -->
-    <section id="charts-section" aria-label="Country ranking charts">
 
       <!-- Left bar chart: Illness ranking (treatment_gap_pct by default) -->
       <div id="bar-left-container" class="bar-container">

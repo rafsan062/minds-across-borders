@@ -31,11 +31,11 @@ function initMap() {
 
   // ─── Palette registry ───────────────────────────────────────────
   const PALETTES = {
-    crisis:   { label: "Default",  colors: ["#efbec0", "#e59aa5", "#d4748f", "#ab4f82", "#903568", "#6f1f51"] },
-    oranges:  { label: "Oranges",  colors: ["#feedde", "#fdd0a2", "#fdae6b", "#fd8d3c", "#e6550d", "#a63603"] },
-    purples:  { label: "Purples",  colors: ["#f2f0f7", "#dadaeb", "#bcbddc", "#9e9ac8", "#756bb1", "#54278f"] },
-    reds:     { label: "Reds",     colors: ["#fee5d9", "#fcbba1", "#fc9272", "#fb6a4a", "#de2d26", "#a50f15"] },
-    mono:     { label: "Mono",     colors: ["#e0e0e0", "#bdbdbd", "#969696", "#737373", "#525252", "#252525"] },
+    crisis: { label: "Default", colors: ["#efbec0", "#e59aa5", "#d4748f", "#ab4f82", "#903568", "#6f1f51"] },
+    oranges: { label: "Oranges", colors: ["#feedde", "#fdd0a2", "#fdae6b", "#fd8d3c", "#e6550d", "#a63603"] },
+    purples: { label: "Purples", colors: ["#f2f0f7", "#dadaeb", "#bcbddc", "#9e9ac8", "#756bb1", "#54278f"] },
+    reds: { label: "Reds", colors: ["#fee5d9", "#fcbba1", "#fc9272", "#fb6a4a", "#de2d26", "#a50f15"] },
+    mono: { label: "Mono", colors: ["#e0e0e0", "#bdbdbd", "#969696", "#737373", "#525252", "#252525"] },
   };
   const PALETTE_KEYS = Object.keys(PALETTES);
 
@@ -82,6 +82,12 @@ function initMap() {
     .style("flex-direction", "column")
     .style("align-items", "stretch")
     .style("gap", "3px")
+    .style("background", "rgba(255, 255, 255, 0.85)")
+    .style("backdrop-filter", "blur(4px)")
+    .style("border", "1px solid rgba(0, 0, 0, 0.1)")
+    .style("border-radius", "8px")
+    .style("padding", "6px 10px")
+    .style("box-shadow", "0 2px 8px rgba(0,0,0,0.05)")
     .style("pointer-events", "none");
 
   resetButton.on("click", () => {
@@ -326,7 +332,7 @@ function initMap() {
 
     projection.fitSize([width, height], { type: "FeatureCollection", features });
     const [tx, ty] = projection.translate();
-    projection.translate([tx - 20, ty - 10]);
+    projection.translate([tx - 50, ty + 10]);
 
     const metric = state.mapMetric || "mh_crisis_index";
 
@@ -390,14 +396,14 @@ function initMap() {
       .attr("opacity", (feature) => {
         const id = getFeatureKey(feature);
         const row = getRowForFeature(feature);
-        
+
         if (state.selectedId) {
           if (id === state.selectedId) return 1;
           const selectedRow = state.rowById?.get(state.selectedId);
           if (selectedRow && row && row.region === selectedRow.region) return 0.85;
           return 0.15;
         }
-        
+
         if (!state.focusedRegion) return 1;
         if (!row) return 0.2;
         return row.region === state.focusedRegion ? 1 : 0.2;
@@ -429,7 +435,7 @@ function initMap() {
         if (!id) return;
         const currentState = getState();
         const isDeselecting = currentState.selectedId === id;
-        
+
         if (isDeselecting) {
           // Restore previous region view
           setState({
