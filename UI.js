@@ -41,6 +41,55 @@ function initUI() {
   let mouseX = 0;
   let mouseY = 0;
 
+  // Detail Panel setup
+  const detailPanel = document.getElementById("detail-panel");
+  const detailClose = document.getElementById("btn-close-detail");
+  const btnShowMore = document.getElementById("btn-show-more");
+  
+  const dCountry = detailPanel?.querySelector(".detail-country");
+  const dRegion = detailPanel?.querySelector(".detail-region");
+  const dPop = detailPanel?.querySelector(".detail-pop");
+  
+  const dCrisis = detailPanel?.querySelector(".detail-crisis-val");
+  const dGap = detailPanel?.querySelector(".di-gap");
+  const dPsych = detailPanel?.querySelector(".di-psych");
+  const dBudget = detailPanel?.querySelector(".di-budget");
+  const dMhsys = detailPanel?.querySelector(".di-mhsys");
+  const dGdp = detailPanel?.querySelector(".di-gdp");
+  
+  const dSuicide = detailPanel?.querySelector(".di-suicide");
+  const dDepression = detailPanel?.querySelector(".di-depression");
+  const dAnxiety = detailPanel?.querySelector(".di-anxiety");
+  const dYouth = detailPanel?.querySelector(".di-youth");
+  const dInvestment = detailPanel?.querySelector(".di-investment");
+  
+  const dIncome = detailPanel?.querySelector(".detail-income");
+  const dGlobalAvg = detailPanel?.querySelector(".dc-global");
+  const dRegionAvg = detailPanel?.querySelector(".dc-region");
+  const dIncomeAvg = detailPanel?.querySelector(".dc-income");
+
+  if (detailClose) {
+    detailClose.addEventListener("click", () => {
+      const currentState = getState();
+      setState({
+        selectedId: null,
+        focusedRegion: currentState.previousFocusedRegion || null,
+        previousFocusedRegion: null,
+      });
+    });
+  }
+
+  if (btnShowMore) {
+    btnShowMore.addEventListener("click", () => {
+      detailPanel.classList.toggle("expanded");
+      if (detailPanel.classList.contains("expanded")) {
+        btnShowMore.textContent = "Show Less";
+      } else {
+        btnShowMore.textContent = "Show More";
+      }
+    });
+  }
+
   // Track global mouse position for tooltip positioning
   document.addEventListener("mousemove", (e) => {
     mouseX = e.pageX;
@@ -81,7 +130,7 @@ function initUI() {
     const state = getState();
     const hoveredId = state.hoveredId;
 
-    if (hoveredId && state.rowById && state.rowById.has(hoveredId)) {
+    if (hoveredId && !state.selectedId && state.rowById && state.rowById.has(hoveredId)) {
       const row = state.rowById.get(hoveredId);
       
       const mapMetric = state.mapMetric || "mh_crisis_index";
@@ -90,7 +139,18 @@ function initUI() {
 
       // Populate data
       if (ttCountry) ttCountry.textContent = row.country || "Unknown";
-      if (ttRegion) ttRegion.textContent = row.region || "Unknown";
+      if (ttRegion) {
+        ttRegion.textContent = row.region || "Unknown";
+        const regionColors = {
+          "Africa": "var(--color-africa)",
+          "Americas": "var(--color-americas)",
+          "Europe": "var(--color-europe)",
+          "S-E Asia": "var(--color-se-asia)",
+          "E. Med": "var(--color-e-med)",
+          "W. Pacific": "var(--color-w-pacific)"
+        };
+        ttRegion.style.color = regionColors[row.region] || "var(--text-secondary)";
+      }
       
       if (ttPrimaryLabel) ttPrimaryLabel.textContent = metricLabels[mapMetric] || mapMetric;
       if (ttPrimaryValue) ttPrimaryValue.textContent = row[mapMetric] !== null ? row[mapMetric] : "N/A";
@@ -122,6 +182,87 @@ function initUI() {
     if (barLeftTitleSpan) barLeftTitleSpan.textContent = metricLabels[rank1Metric] || rank1Metric;
     if (barRightTitleSpan) barRightTitleSpan.textContent = metricLabels[rank2Metric] || rank2Metric;
     if (mapTitleSpan) mapTitleSpan.textContent = metricLabels[mapMetric] || mapMetric;
+
+    // --- Detail Panel Logic ---
+    const selectedId = state.selectedId;
+    if (selectedId && state.rowById && state.rowById.has(selectedId) && detailPanel) {
+      const row = state.rowById.get(selectedId);
+      
+      if (dCountry) dCountry.textContent = row.country || "Unknown";
+      if (dRegion) {
+        dRegion.textContent = row.region || "Unknown";
+        const regionColors = {
+          "Africa": "var(--color-africa)",
+          "Americas": "var(--color-americas)",
+          "Europe": "var(--color-europe)",
+          "S-E Asia": "var(--color-se-asia)",
+          "E. Med": "var(--color-e-med)",
+          "W. Pacific": "var(--color-w-pacific)"
+        };
+        dRegion.style.color = regionColors[row.region] || "var(--text-secondary)";
+      }
+      if (dIncome) {
+        dIncome.textContent = row.income_group || "Unknown";
+        const incomeColors = {
+          "High": "#6ECA97",
+          "Upper-Middle": "#ab4f82",
+          "Lower-Middle": "#e59aa5",
+          "Low": "#efbec0"
+        };
+        dIncome.style.color = incomeColors[row.income_group] || "var(--text-secondary)";
+      }
+      if (dPop) dPop.textContent = row.population_millions !== null ? row.population_millions : "N/A";
+      
+      if (dCrisis) dCrisis.textContent = row.mh_crisis_index !== null ? row.mh_crisis_index : "N/A";
+
+      // Calculate averages for Crisis Index
+      if (state.rows && row.mh_crisis_index !== null) {
+        const crisisMetric = "mh_crisis_index";
+        
+        // Global
+        const globalRows = state.rows.filter(r => r[crisisMetric] !== null);
+        const globalAvg = globalRows.reduce((sum, r) => sum + r[crisisMetric], 0) / globalRows.length;
+        
+        // Region
+        const regionRows = globalRows.filter(r => r.region === row.region);
+        const regionAvg = regionRows.reduce((sum, r) => sum + r[crisisMetric], 0) / regionRows.length;
+        
+        // Income Group
+        const incomeRows = globalRows.filter(r => r.income_group === row.income_group);
+        const incomeAvg = incomeRows.reduce((sum, r) => sum + r[crisisMetric], 0) / incomeRows.length;
+
+        const formatDiff = (val, avg) => {
+          const diff = val - avg;
+          const sign = diff >= 0 ? "+" : "";
+          return `${avg.toFixed(1)} (${sign}${diff.toFixed(1)})`;
+        };
+
+        if (dGlobalAvg) dGlobalAvg.textContent = formatDiff(row[crisisMetric], globalAvg);
+        if (dRegionAvg) dRegionAvg.textContent = formatDiff(row[crisisMetric], regionAvg);
+        if (dIncomeAvg) dIncomeAvg.textContent = formatDiff(row[crisisMetric], incomeAvg);
+      }
+      if (dGap) dGap.textContent = row.treatment_gap_pct !== null ? `${row.treatment_gap_pct}%` : "N/A";
+      if (dPsych) dPsych.textContent = row.psychiatrists_per100k !== null ? row.psychiatrists_per100k : "N/A";
+      if (dBudget) dBudget.textContent = row.mh_budget_pct_health !== null ? `${row.mh_budget_pct_health}%` : "N/A";
+      if (dMhsys) dMhsys.textContent = row.mh_system_score !== null ? row.mh_system_score : "N/A";
+      if (dGdp) dGdp.textContent = row.gdp_per_capita_usd !== null ? `$${row.gdp_per_capita_usd.toLocaleString()}` : "N/A";
+      
+      if (dSuicide) dSuicide.textContent = row.suicide_rate_per100k !== null ? row.suicide_rate_per100k : "N/A";
+      if (dDepression) dDepression.textContent = row.depression_pct !== null ? `${row.depression_pct}%` : "N/A";
+      if (dAnxiety) dAnxiety.textContent = row.anxiety_pct !== null ? `${row.anxiety_pct}%` : "N/A";
+      if (dYouth) dYouth.textContent = row.youth_mh_crisis_score !== null ? row.youth_mh_crisis_score : "N/A";
+      if (dInvestment) dInvestment.textContent = row.mh_investment_gap !== null ? row.mh_investment_gap : "N/A";
+
+      // Reset expansion state for new country
+      detailPanel.classList.remove("expanded");
+      if (btnShowMore) btnShowMore.textContent = "Show More";
+
+      detailPanel.classList.add("visible");
+      detailPanel.setAttribute("aria-hidden", "false");
+    } else if (detailPanel) {
+      detailPanel.classList.remove("visible");
+      detailPanel.setAttribute("aria-hidden", "true");
+    }
   }
 
   // Wire metric dropdowns to state

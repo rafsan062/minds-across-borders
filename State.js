@@ -74,6 +74,8 @@ const _state = {
     hoveredId:       null,
     selectedId:      null,
     focusedRegion:   null,
+    hoveredLegendIndex: null,   // index of legend color segment being hovered
+    previousFocusedRegion: null, // saved region when entering country detail
   
     // Metric selections (matching dropdown defaults in mockup)
     mapMetric:       "mh_crisis_index",
@@ -85,6 +87,9 @@ const _state = {
     scatterX:        "gdp_per_capita_usd",
     scatterY:        "mh_crisis_index",
     scatterSize:     "total_affected_millions",
+
+    // Map palette key
+    mapPaletteKey:   "crisis",
   };
   
   // ─── Subscribers ─────────────────────────────────────────────────────────────

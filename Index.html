@@ -63,8 +63,8 @@
 
     <!-- Left column: map + region filter buttons -->
     <section id="map-section" aria-label="World choropleth map">
-      <div class="map-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h2 class="map-title"><span id="map-title-metric">Crisis Index</span> by Country</h2>
+      <div class="map-header" style="display: flex; justify-content: flex-end; align-items: center; position: relative;">
+        <h2 class="map-title" style="position: absolute; left: 50%; transform: translateX(-50%); margin: 0; font-size: 1.25rem; font-weight: 500;"><span id="map-title-metric">Crisis Index</span> by Country</h2>
         <div class="metric-dropdown" id="ctrl-map-metric">
           <label class="dropdown-label" for="select-map-metric">MAP:</label>
           <select id="select-map-metric" class="pill-select" aria-label="Map metric">
@@ -176,6 +176,7 @@
     Hidden by default; shown with class "visible".
   -->
   <div id="detail-panel" class="detail-panel" aria-label="Country detail" aria-hidden="true">
+    <button id="btn-close-detail" class="btn-close-detail" aria-label="Close detail panel">×</button>
     <h3 class="detail-country"></h3>
     <p class="detail-meta">
       Region: <span class="detail-region"></span>
@@ -196,12 +197,24 @@
 
     <div class="detail-indicators">
       <h4>Key Indicators</h4>
-      <ul>
-        <li>Treatment Gap: <span class="di-gap"></span></li>
-        <li>Psychiatrists/100k: <span class="di-psych"></span></li>
-        <li>Budget % Health: <span class="di-budget"></span></li>
-        <li>MH System Score: <span class="di-mhsys"></span></li>
-        <li>GDP per Capita: <span class="di-gdp"></span></li>
+      <ul class="indicator-list">
+        <li><span>Treatment Gap:</span> <span class="di-gap"></span></li>
+        <li><span>Psychiatrists/100k:</span> <span class="di-psych"></span></li>
+        <li><span>Budget % Health:</span> <span class="di-budget"></span></li>
+        <li><span>MH System Score:</span> <span class="di-mhsys"></span></li>
+        <li><span>GDP per Capita:</span> <span class="di-gdp"></span></li>
+      </ul>
+    </div>
+
+    <button id="btn-show-more" class="btn-show-more">Show More</button>
+
+    <div id="detail-expanded" class="detail-expanded">
+      <ul class="indicator-list">
+        <li><span>Suicide Rate:</span> <span class="di-suicide"></span></li>
+        <li><span>Depression Rate:</span> <span class="di-depression"></span></li>
+        <li><span>Anxiety Rate:</span> <span class="di-anxiety"></span></li>
+        <li><span>Youth Crisis Score:</span> <span class="di-youth"></span></li>
+        <li><span>Investment Gap:</span> <span class="di-investment"></span></li>
       </ul>
     </div>
   </div>

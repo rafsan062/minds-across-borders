@@ -12,13 +12,38 @@ function initMap() {
     .append("svg")
     .attr("width", width)
     .attr("height", height)
-    .attr("viewBox", `0 0 ${width} ${height}`);
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .on("click", (event) => {
+      if (event.target.tagName === "svg" || event.target.classList.contains("globe-bg")) {
+        const currentState = getState();
+        setState({
+          selectedId: null,
+          focusedRegion: currentState.previousFocusedRegion || null,
+          previousFocusedRegion: null,
+        });
+      }
+    });
 
   const mapLayer = svg.append("g").attr("class", "map-layer");
 
   const projection = d3.geoNaturalEarth1();
   const path = d3.geoPath(projection);
-  const mapPalette = ["#efbec0", "#e59aa5", "#d4748f", "#ab4f82", "#903568", "#6f1f51"];
+
+  // ─── Palette registry ───────────────────────────────────────────
+  const PALETTES = {
+    crisis:   { label: "Default",  colors: ["#efbec0", "#e59aa5", "#d4748f", "#ab4f82", "#903568", "#6f1f51"] },
+    oranges:  { label: "Oranges",  colors: ["#feedde", "#fdd0a2", "#fdae6b", "#fd8d3c", "#e6550d", "#a63603"] },
+    purples:  { label: "Purples",  colors: ["#f2f0f7", "#dadaeb", "#bcbddc", "#9e9ac8", "#756bb1", "#54278f"] },
+    reds:     { label: "Reds",     colors: ["#fee5d9", "#fcbba1", "#fc9272", "#fb6a4a", "#de2d26", "#a50f15"] },
+    mono:     { label: "Mono",     colors: ["#e0e0e0", "#bdbdbd", "#969696", "#737373", "#525252", "#252525"] },
+  };
+  const PALETTE_KEYS = Object.keys(PALETTES);
+
+  function getActivePalette() {
+    const key = getState().mapPaletteKey || "crisis";
+    return PALETTES[key]?.colors || PALETTES.crisis.colors;
+  }
+
   const globeBackgroundColor = "#ffffff";
   const noDataCountryColor = "#e6e6e6";
 
@@ -106,27 +131,87 @@ function initMap() {
     return null;
   }
 
-  function drawLegend(breaks) {
-    legendOverlay.selectAll("*").remove();
+  // Track state for region zoom and palette dropdown
+  let lastFocusedRegion = null;
+  let paletteDropdownOpen = false;
 
+  function drawLegend(breaks, metric, colorScale) {
+    const palette = getActivePalette();
+    const currentKey = getState().mapPaletteKey || "crisis";
+    const currentLabel = PALETTES[currentKey]?.label || "Crisis";
+
+    legendOverlay.selectAll("*").remove();
+    legendOverlay.style("pointer-events", "auto");
+
+    // ── Palette selector button ──────────────────────────────────
+    const selectorRow = legendOverlay
+      .append("div")
+      .style("display", "flex")
+      .style("align-items", "center")
+      .style("justify-content", "flex-end")
+      .style("gap", "4px")
+      .style("cursor", "pointer")
+      .style("margin-bottom", "3px")
+      .on("click", (event) => {
+        event.stopPropagation();
+        paletteDropdownOpen = !paletteDropdownOpen;
+        drawLegend(breaks, metric, colorScale); // re-render with dropdown toggled
+      });
+
+    selectorRow
+      .append("span")
+      .style("font-size", "10px")
+      .style("color", "#7D6983")
+      .style("font-weight", "600")
+      .style("letter-spacing", "0.03em")
+      .text(currentLabel);
+
+    selectorRow
+      .append("span")
+      .style("font-size", "8px")
+      .style("color", "#7D6983")
+      .text(paletteDropdownOpen ? "▲" : "▼");
+
+    // ── Legend color bar (interactive segments) ──────────────────
     const bar = legendOverlay
       .append("div")
       .style("display", "grid")
-      .style("grid-template-columns", `repeat(${mapPalette.length}, 1fr)`)
+      .style("grid-template-columns", `repeat(${palette.length}, 1fr)`)
       .style("width", "200px")
-      .style("height", "10px");
+      .style("height", "12px");
 
     bar
       .selectAll("div.legend-segment")
-      .data(mapPalette)
+      .data(palette)
       .join("div")
       .attr("class", "legend-segment")
       .style("background", (d) => d)
+      .style("cursor", "pointer")
       .style("border-top", "1px solid rgba(90, 50, 90, 0.25)")
       .style("border-bottom", "1px solid rgba(90, 50, 90, 0.25)")
       .style("border-left", (_, i) => (i === 0 ? "1px solid rgba(90, 50, 90, 0.25)" : "none"))
-      .style("border-right", (_, i) => (i === mapPalette.length - 1 ? "1px solid rgba(90, 50, 90, 0.25)" : "none"));
+      .style("border-right", (_, i) => (i === palette.length - 1 ? "1px solid rgba(90, 50, 90, 0.25)" : "none"))
+      .style("transition", "transform 0.1s, box-shadow 0.1s")
+      .on("mouseenter", function (event, d) {
+        const idx = palette.indexOf(d);
+        // Directly manipulate country path opacity without triggering re-render
+        mapLayer.selectAll("path.country-path").each(function (feature) {
+          const row = matchFeatureToRow(feature, getState());
+          if (!row) { d3.select(this).style("opacity", 0.15); return; }
+          const value = row[metric];
+          if (!Number.isFinite(value)) { d3.select(this).style("opacity", 0.15); return; }
+          const countryColor = colorScale(value);
+          d3.select(this).style("opacity", countryColor === palette[idx] ? 1 : 0.15);
+        });
+      })
+      .on("mouseleave", () => {
+        // Restore all country paths to their normal opacity
+        mapLayer.selectAll("path.country-path").each(function () {
+          d3.select(this).style("opacity", null);
+        });
+      });
 
+    // ── Break labels ────────────────────────────────────────────
     const labels = legendOverlay
       .append("div")
       .style("display", "grid")
@@ -143,13 +228,89 @@ function initMap() {
       .style("line-height", "1")
       .style("color", "#47384c")
       .text((d) => `${d}`);
+
+    // ── Palette dropdown ────────────────────────────────────────
+    if (paletteDropdownOpen) {
+      const dropdown = legendOverlay
+        .append("div")
+        .attr("class", "palette-dropdown")
+        .style("position", "absolute")
+        .style("top", "100%")
+        .style("right", "0")
+        .style("margin-top", "4px")
+        .style("background", "rgba(255,255,255,0.98)")
+        .style("border", "1px solid #cdbec4")
+        .style("border-radius", "8px")
+        .style("box-shadow", "0 6px 20px rgba(0,0,0,0.12)")
+        .style("padding", "8px")
+        .style("width", "220px")
+        .style("z-index", "100");
+
+      PALETTE_KEYS.forEach((key) => {
+        const pal = PALETTES[key];
+        const isActive = key === currentKey;
+
+        const row = dropdown
+          .append("div")
+          .style("display", "flex")
+          .style("flex-direction", "column")
+          .style("gap", "3px")
+          .style("padding", "6px 8px")
+          .style("border-radius", "6px")
+          .style("cursor", "pointer")
+          .style("background", isActive ? "rgba(111, 31, 81, 0.08)" : "transparent")
+          .style("transition", "background 0.15s")
+          .on("mouseenter", function () {
+            d3.select(this).style("background", "rgba(111, 31, 81, 0.12)");
+          })
+          .on("mouseleave", function () {
+            d3.select(this).style("background", isActive ? "rgba(111, 31, 81, 0.08)" : "transparent");
+          })
+          .on("click", (event) => {
+            event.stopPropagation();
+            paletteDropdownOpen = false;
+            setState({ mapPaletteKey: key });
+          });
+
+        // Color swatch row
+        const swatchRow = row
+          .append("div")
+          .style("display", "grid")
+          .style("grid-template-columns", `repeat(${pal.colors.length}, 1fr)`)
+          .style("height", "14px")
+          .style("border-radius", "3px")
+          .style("overflow", "hidden");
+
+        swatchRow
+          .selectAll("div")
+          .data(pal.colors)
+          .join("div")
+          .style("background", (c) => c);
+
+        // Label
+        row
+          .append("div")
+          .style("font-size", "10px")
+          .style("color", isActive ? "#6f1f51" : "#7D6983")
+          .style("font-weight", isActive ? "700" : "500")
+          .text(pal.label);
+      });
+
+      // Close dropdown when clicking outside
+      d3.select("body").on("click.palette-dropdown", () => {
+        paletteDropdownOpen = false;
+        drawLegend(breaks, metric, colorScale);
+        d3.select("body").on("click.palette-dropdown", null);
+      });
+    }
   }
 
   function getLegendBreaks(metric, maxValue) {
+    const palette = getActivePalette();
     if (metric === "mh_crisis_index") return [0, 16, 32, 48, 64, 80];
     const safeMax = Math.max(1, maxValue);
-    const step = safeMax / (mapPalette.length - 1);
-    return Array.from({ length: mapPalette.length }, (_, i) => Math.round(i * step));
+    const step = safeMax / (palette.length - 1);
+    return Array.from({ length: palette.length }, (_, i) => Math.round(i * step));
   }
 
   function render() {
@@ -187,10 +348,11 @@ function initMap() {
 
     const maxValue = d3.max(values) || 1;
     const domainMax = metric === "mh_crisis_index" ? 80 : maxValue;
+    const activePalette = getActivePalette();
     const colorScale = d3
       .scaleQuantize()
       .domain([0, domainMax])
-      .range(mapPalette);
+      .range(activePalette);
 
     mapLayer
       .selectAll("path.globe-bg")
@@ -207,32 +369,53 @@ function initMap() {
       .data(features, (d, i) => getFeatureKey(d) || d.properties?.name || `feature-${i}`);
 
     countryPaths
-      .join("path")
-      .attr("class", "country-path")
+      .join(
+        enter => enter.append("path")
+          .attr("class", "country-path")
+          .attr("d", path)
+          .attr("fill", noDataCountryColor)
+          .attr("opacity", 1)
+          .style("transition", "opacity 0.15s ease"),
+        update => update,
+        exit => exit.remove()
+      )
       .attr("d", path)
+      .transition().duration(150)
       .attr("fill", (feature) => {
         const row = getRowForFeature(feature);
         const value = row?.[metric];
         if (!row) return noDataCountryColor;
         return Number.isFinite(value) ? colorScale(value) : noDataCountryColor;
       })
+      .attr("opacity", (feature) => {
+        const id = getFeatureKey(feature);
+        const row = getRowForFeature(feature);
+        
+        if (state.selectedId) {
+          if (id === state.selectedId) return 1;
+          const selectedRow = state.rowById?.get(state.selectedId);
+          if (selectedRow && row && row.region === selectedRow.region) return 0.85;
+          return 0.15;
+        }
+        
+        if (!state.focusedRegion) return 1;
+        if (!row) return 0.2;
+        return row.region === state.focusedRegion ? 1 : 0.2;
+      });
+
+    // Re-apply non-transitioned attributes (stroke, events) after transition setup
+    mapLayer.selectAll("path.country-path")
       .style("stroke", (feature) => {
         const id = getFeatureKey(feature);
         if (id && id === state.selectedId) return "#6ECA97";
-        if (id && id === state.hoveredId) return "#6ECA97";
+        if (id && id === state.hoveredId) return "#FFD700";
         return "#9f9f9f";
       })
       .style("stroke-width", (feature) => {
         const id = getFeatureKey(feature);
-        if (id && id === state.selectedId) return 1.8;
-        if (id && id === state.hoveredId) return 1.3;
-        return 0.45;
-      })
-      .attr("opacity", (feature) => {
-        if (!state.focusedRegion) return 1;
-        const row = getRowForFeature(feature);
-        if (!row) return 0.2;
-        return row.region === state.focusedRegion ? 1 : 0.2;
+        if (id && id === state.selectedId) return "2.5px";
+        if (id && id === state.hoveredId) return "1.3px";
+        return "0.45px";
       })
       .on("mouseenter", function (_, feature) {
         const id = getFeatureKey(feature);
@@ -244,11 +427,63 @@ function initMap() {
       .on("click", function (_, feature) {
         const id = getFeatureKey(feature);
         if (!id) return;
-        const nextSelected = getState().selectedId === id ? null : id;
-        setState({ selectedId: nextSelected });
+        const currentState = getState();
+        const isDeselecting = currentState.selectedId === id;
+        
+        if (isDeselecting) {
+          // Restore previous region view
+          setState({
+            selectedId: null,
+            hoveredId: null,
+            focusedRegion: currentState.previousFocusedRegion || null,
+            previousFocusedRegion: null,
+          });
+        } else {
+          // Save current region, then select
+          setState({
+            selectedId: id,
+            hoveredId: null,
+            previousFocusedRegion: currentState.focusedRegion,
+          });
+        }
       });
 
-    drawLegend(getLegendBreaks(metric, maxValue));
+    drawLegend(getLegendBreaks(metric, maxValue), metric, colorScale);
+
+    // ── Auto-zoom to focused region ──────────────────────────────
+    if (state.focusedRegion !== lastFocusedRegion) {
+      lastFocusedRegion = state.focusedRegion;
+
+      if (state.focusedRegion) {
+        // Get all features that belong to this region
+        const regionFeatures = features.filter(f => {
+          const row = matchFeatureToRow(f, state);
+          return row && row.region === state.focusedRegion;
+        });
+
+        if (regionFeatures.length > 0) {
+          const regionGeo = { type: "FeatureCollection", features: regionFeatures };
+          const [[x0, y0], [x1, y1]] = d3.geoPath(projection).bounds(regionGeo);
+
+          const bw = x1 - x0;
+          const bh = y1 - y0;
+          const cx = (x0 + x1) / 2;
+          const cy = (y0 + y1) / 2;
+
+          const scale = Math.min(8, 0.85 / Math.max(bw / width, bh / height));
+          const tx = width / 2 - scale * cx;
+          const ty = height / 2 - scale * cy;
+
+          svg.transition().duration(500).call(
+            zoom.transform,
+            d3.zoomIdentity.translate(tx, ty).scale(scale)
+          );
+        }
+      } else {
+        // Reset to default world view
+        svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+      }
+    }
   }
 
   subscribe(render);
