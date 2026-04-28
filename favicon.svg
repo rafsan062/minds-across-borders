@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Brain/Mind Side -->
+  <path d="M16 4c-4.4 0-8 3.6-8 8 0 1.5.4 2.9 1.1 4.1C7.6 17.5 7 19.2 7 21c0 3.9 3.1 7 7 7h2V4z" fill="#008080" />
+  <!-- Globe/Borders Side -->
+  <path d="M16 4v24h2c3.9 0 7-3.1 7-7 0-1.8-.6-3.5-1.6-4.9.7-1.2 1.1-2.6 1.1-4.1 0-4.4-3.6-8-8-8h-0.5z" fill="#ff8c00" />
+  <!-- Grid Lines -->
+  <path d="M16 8c2.2 0 4 1.8 4 4s-1.8 4-4 4M16 16c2.2 0 4 1.8 4 4s-1.8 4-4 4" fill="none" stroke="white" stroke-width="0.5" opacity="0.5" />
+</svg>
