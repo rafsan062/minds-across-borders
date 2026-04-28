@@ -2,24 +2,51 @@
 // Two horizontal scrollable ranking bar charts
 
 window.initBar = function () {
-    const margin = { top: 20, right: 20, bottom: 30, left: 160 };
+    const margin = { top: 20, right: 20, bottom: 30, left: 100 };
     const containerWidth = d3.select("#bar-left").node().clientWidth;
     const width = containerWidth * .9 - margin.left - margin.right;
 
     const rowHeight = 18; // controls vertical spacing per country
 
     // SVG containers
-    const svgLeft = d3.select("#bar-left")
+
+    const svgAxisLeft = d3.select("#bar-left .bar-axis")
+        .append("svg")
+        .attr("height", 40)
+        .attr("width", width + margin.left + margin.right)
+        .append("g")
+        .attr("transform", `translate(${margin.left},20)`);
+
+    const svgLeft = d3.select("#bar-left .bar-scroll")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const svgRight = d3.select("#bar-right")
+    const svgAxisRight = d3.select("#bar-right .bar-axis")
+        .append("svg")
+        .attr("height", 40)
+        .attr("width", width + margin.left + margin.right)
+        .append("g")
+        .attr("transform", `translate(${margin.left},20)`);
+
+    const svgRight = d3.select("#bar-right .bar-scroll")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // const svgLeft = d3.select("#bar-left")
+    //     .append("svg")
+    //     .attr("width", width + margin.left + margin.right)
+    //     .append("g")
+    //     .attr("transform", `translate(${margin.left},${margin.top})`);
+    //
+    // const svgRight = d3.select("#bar-right")
+    //     .append("svg")
+    //     .attr("width", width + margin.left + margin.right)
+    //     .append("g")
+    //     .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // Dropdowns
     const selectLeft = d3.select("#select-bar-left");
@@ -72,6 +99,7 @@ window.initBar = function () {
 
         renderChart(
             svgLeft,
+            svgAxisLeft,
             data,
             state.barLeftMetric,
             key,
@@ -82,6 +110,7 @@ window.initBar = function () {
 
         renderChart(
             svgRight,
+            svgAxisRight,
             data,
             state.barRightMetric,
             key,
@@ -94,7 +123,7 @@ window.initBar = function () {
     // ─────────────────────────────────────────────
     // Render chart
     // ─────────────────────────────────────────────
-    function renderChart(svg, data, metric, key, state, titleId, containerSelector) {
+    function renderChart(svg, axis, data, metric, key, state, titleId, containerSelector) {
         const nameField = "country"; // change if needed
 
         // Filter + sort ALL countries
@@ -113,13 +142,15 @@ window.initBar = function () {
         const chartHeight = filtered.length * rowHeight;
 
         // Resize SVG dynamically
-        const svgRoot = d3.select(containerSelector).select("svg");
+        const svgRoot = d3.select(containerSelector)
+            .select(".bar-scroll svg");
+
         svgRoot.attr("height", chartHeight + margin.top + margin.bottom);
 
         // Scales
         const x = d3.scaleLinear()
             .domain([0, d3.max(filtered, d => +d[metric]) || 0])
-            .range([0, containerWidth * 0.7]);
+            .range([0, width]);
 
         const y = d3.scaleBand()
             .domain(filtered.map(d => d[nameField]))
@@ -136,8 +167,14 @@ window.initBar = function () {
             .style("font-size", `${Math.min(14, rowHeight * 0.7)}px`);
 
         // X axis
-        svg.append("g")
-            .attr("transform", `translate(0,${chartHeight})`)
+        // svg.append("g")
+        //     .attr("transform", `translate(0,${chartHeight})`)
+        //     .call(d3.axisBottom(x).ticks(5));
+
+        axis.selectAll("*").remove();
+
+        axis.append("g")
+            .attr("transform", "translate(0,0)")
             .call(d3.axisBottom(x).ticks(5));
 
         // Bars
@@ -179,7 +216,9 @@ window.initBar = function () {
             const selected = filtered.find(d => d[key] === state.selectedId);
             if (selected) {
                 const yPos = y(selected[nameField]);
-                const container = d3.select(containerSelector).node();
+                const container = d3.select(containerSelector)
+                    .select(".bar-scroll")
+                    .node();
 
                 if (yPos != null) {
                     container.scrollTop = yPos;
