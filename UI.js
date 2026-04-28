@@ -66,6 +66,47 @@ function initUI() {
   const dRegionAvg = detailPanel?.querySelector(".dc-region");
   const dIncomeAvg = detailPanel?.querySelector(".dc-income");
 
+  // Make the detail panel draggable
+  if (detailPanel && dCountry) {
+    setupDraggable(detailPanel, dCountry);
+  }
+
+  function setupDraggable(el, handle) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    handle.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+      e = e || window.event;
+      // If clicking a button inside handle, don't drag
+      if (e.target.tagName === 'BUTTON') return;
+      e.preventDefault();
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+
+      // Remove fixed centering styles so dragging works reliably
+      el.style.transform = 'none';
+      el.style.margin = '0';
+      el.style.top = (el.offsetTop - pos2) + "px";
+      el.style.left = (el.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+  }
+
   if (detailClose) {
     detailClose.addEventListener("click", () => {
       const currentState = getState();

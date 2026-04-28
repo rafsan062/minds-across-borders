@@ -866,6 +866,8 @@ ul {
   color: var(--text-primary);
   margin-bottom: 0.2rem;
   margin-top: 0;
+  cursor: move; /* Indicates the panel is draggable */
+  user-select: none; /* Prevents text selection while dragging */
 }
 
 .detail-meta {
