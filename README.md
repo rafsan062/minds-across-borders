@@ -15,13 +15,12 @@ The dashboard integrates multiple linked views—including a world choropleth ma
 *   **Sasivadhan Kandregula**
 
 ## Changes from VA3 Design Proposal
-The transition from the VA3 proposal to the final VA4 implementation introduced several major structural and interactive enhancements to improve data exploration:
+The final VA4 implementation introduces several high-impact structural and interactive enhancements that were not present in the initial VA3 design proposal:
 
-*   **Addition of Interactive Scatterplot**: The most significant change from the VA3 design is the inclusion of a dynamic scatterplot. This view allows users to correlate any two metrics (e.g., GDP vs. Suicide Rate) while using circle size to represent a third variable, providing a depth of analysis not present in the original proposal.
-*   **Draggable Detail Panel**: To improve usability, the country detail panel was transformed into a draggable floating component. This allows users to reposition the detailed data metrics anywhere on the screen to avoid obstructing the underlying map or charts.
-*   **Global Peer-Mode Toggle**: We added a centralized toggle that allows users to switch between **Regional** and **Income-Group** peer highlighting. This interaction instantly synchronizes highlights across the map, scatterplot, and bar charts.
-*   **Dynamic Variable Selection**: Every chart now features integrated dropdown menus, enabling users to switch the primary metrics for the map, both ranking bars, and all three scatterplot axes in real-time.
-*   **Horizontal Region Carousel**: To manage the full scope of the WHO geographic regions without cluttering the UI, we implemented a horizontal "slider" filter that ensures easy navigation on all screen sizes.
+*   **Addition of the Interactive Scatterplot**: The most significant structural addition is the interactive scatterplot. This view allows for multi-dimensional analysis (X-axis, Y-axis, and Circle Size), enabling users to uncover correlations between socioeconomic factors and mental health outcomes that were not accessible in the original proposal.
+*   **Draggable Detail Panel**: To improve dashboard usability, the detail panel was transformed from a static overlay into a floating, draggable component. This allows users to move the panel anywhere on the screen, ensuring that key data metrics never obstruct the underlying map or charts.
+*   **Enhanced UI Interactions & Linking**: We implemented a robust system of linked interactions across all views. This includes synchronized hovering, persistent selection across the map and charts, and a centralized "Peer Mode" toggle that allows for instant comparative analysis across regional and income-group cohorts.
+*   **Full Real-Time Metric Control**: Unlike the static metrics envisioned in VA3, the final dashboard provides users with real-time control over every visualization's metrics through integrated dropdown menus for the map, bar charts, and all scatterplot axes.
 
 ## AI Usage Note
 This project was developed in partnership with AI tools as a coding and design partner:
