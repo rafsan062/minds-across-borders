@@ -2,11 +2,11 @@
 // Two horizontal scrollable ranking bar charts
 
 window.initBar = function () {
-    const margin = { top: 20, right: 20, bottom: 30, left: 100 };
+    const margin = { top: 20, right: 20, bottom: 30, left: 135 }; // Fine-tuned for perfect alignment
     const containerWidth = d3.select("#bar-left").node().clientWidth;
     const width = containerWidth * .9 - margin.left - margin.right;
 
-    const rowHeight = 18; // controls vertical spacing per country
+    const rowHeight = 24; // Increased for much wider spacing
 
     // SVG containers
 
@@ -150,12 +150,12 @@ window.initBar = function () {
         // Scales
         const x = d3.scaleLinear()
             .domain([0, d3.max(filtered, d => +d[metric]) || 0])
-            .range([0, width]);
+            .range([0, width]); // Reverted to start at 0
 
         const y = d3.scaleBand()
             .domain(filtered.map(d => d[nameField]))
             .range([0, chartHeight])
-            .padding(0.1);
+            .padding(0.5); // Wide spacing between bars
 
         // Clear previous render
         svg.selectAll("*").remove();
@@ -175,7 +175,9 @@ window.initBar = function () {
 
         axis.append("g")
             .attr("transform", "translate(0,0)")
-            .call(d3.axisBottom(x).ticks(5));
+            .call(d3.axisBottom(x).ticks(5))
+            .selectAll("text")
+            .style("font-size", "14px"); // 2px larger numbers
 
         // Bars
         svg.selectAll(".bar")
@@ -187,6 +189,8 @@ window.initBar = function () {
             .attr("height", y.bandwidth())
             .attr("x", 0)
             .attr("width", d => x(+d[metric]))
+            .attr("rx", 3) // Small rounded corner
+            .attr("ry", 3)
             .attr("fill", d => window.regionColors?.[d.region] || "#ccc")
             .attr("stroke", d =>
                 state.selectedId === d[key] ? "black" : "none"

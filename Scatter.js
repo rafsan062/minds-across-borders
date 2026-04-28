@@ -2,10 +2,11 @@ function initScatter() {
   const container = d3.select("#scatter");
   if (container.empty()) return;
 
-  const margin = { top: 60, right: 20, bottom: 40, left: 70 };
-  
-  const fullHeight = 350; 
-  const height = fullHeight - margin.top - margin.bottom;
+  const margin = { top: 40, right: 20, bottom: 50, left: 70 };
+
+  let fullHeight = 350;
+  let height = fullHeight - margin.top - margin.bottom;
+  let width = 600;
 
   // Initialize SVG without hardcoded width
   const svg = container
@@ -72,22 +73,29 @@ function initScatter() {
     const rows = state.rows || [];
     if (!rows.length) return;
 
-    // Dynamically get current container width for responsiveness
+    // Dynamically get current container dimensions for responsiveness
     const containerRect = container.node().getBoundingClientRect();
-    const fullWidth = containerRect.width || 600;
-    const width = fullWidth - margin.left - margin.right;
+    const currentFullWidth = containerRect.width || 600;
+    const currentFullHeight = containerRect.height || 350;
+
+    width = currentFullWidth - margin.left - margin.right;
+    height = currentFullHeight - margin.top - margin.bottom;
 
     // Update SVG dimensions
-    svg.attr("width", fullWidth)
-       .attr("viewBox", `0 0 ${fullWidth} ${fullHeight}`);
+    svg.attr("width", currentFullWidth)
+       .attr("height", currentFullHeight)
+       .attr("viewBox", `0 0 ${currentFullWidth} ${currentFullHeight}`);
+
+    // Move X-axis to the new bottom
+    xAxisG.attr("transform", `translate(0,${height})`);
 
     const xMetric = state.scatterX || "gdp_per_capita_usd";
     const yMetric = state.scatterY || "mh_crisis_index";
     const sizeMetric = state.scatterSize || "total_affected_millions";
 
     // Filter valid data
-    const validData = rows.filter(d => 
-      Number.isFinite(Number(d[xMetric])) && 
+    const validData = rows.filter(d =>
+      Number.isFinite(Number(d[xMetric])) &&
       Number.isFinite(Number(d[yMetric]))
     );
 
@@ -272,7 +280,7 @@ function initScatter() {
         const tw = bbox.width + pad * 2;
         const th = bbox.height + pad;
         const lx = Math.max(0, Math.min(cx - tw / 2, width - tw));
-        const ly = Math.max(th, cy - 12); 
+        const ly = Math.max(th, cy - 12);
 
         crossBg.attr("x", lx).attr("y", ly - th)
           .attr("width", tw).attr("height", th);
